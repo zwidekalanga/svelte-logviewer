@@ -3,7 +3,7 @@ import type { LogLine } from '../../../types/log-line.js';
 import { default as parseAnsi } from 'ansiparse';
 
 export const DEFAULT_PROPS: LogViewerProps = {
-	containerStyle: {},
+	containerStyle: { height: 'calc(100% - 40px)' },
 	caseInsensitive: false,
 	enableGutters: false,
 	enableHotKeys: false,
