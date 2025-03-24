@@ -1,7 +1,7 @@
 <script lang="ts">
 	import DownArrowIcon from '$lib/components/lucide/icons/down-arrow.svelte';
 	import UpArrowIcon from '$lib/components/lucide/icons/up-arrow.svelte';
-	import { createEventDispatcher, onMount } from 'svelte';
+	import { createEventDispatcher } from 'svelte';
 
 	let {
 		searchText = '',
@@ -14,22 +14,11 @@
 
 	// Create a Svelte event dispatcher
 	const dispatch = createEventDispatcher();
-	
-	onMount(() => {
-		console.log('[SearchBar] Mounted with props:', { 
-			searchText, 
-			caseInsensitive, 
-			totalResults, 
-			currentResult, 
-			searchMinCharacters 
-		});
-	});
 
 	function handleSearch(event: Event) {
 		const value = (event.target as HTMLInputElement).value;
 		// Instead of dispatching to the document, dispatch to the parent
 		dispatch('search', { value, caseInsensitive });
-		console.log('[SearchBar] Dispatched search event:', { value, caseInsensitive });
 	}
 
 	function handleKeyDown(event: KeyboardEvent) {
@@ -37,18 +26,15 @@
 			const eventName = event.shiftKey ? 'previousResult' : 'nextResult';
 			// Dispatch to the parent component
 			dispatch(eventName);
-			console.log(`[SearchBar] Dispatched ${eventName} event`);
 		}
 	}
 
 	function handlePreviousClick() {
 		dispatch('previousResult');
-		console.log('[SearchBar] Dispatched previousResult event');
 	}
 
 	function handleNextClick() {
 		dispatch('nextResult');
-		console.log('[SearchBar] Dispatched nextResult event');
 	}
 
 	// Use derived state to update the match count text whenever totalResults or currentResult changes
@@ -57,12 +43,6 @@
 			? `${currentResult + 1} of ${totalResults}` 
 			: `0 matches`
 	);
-	
-	// For debugging
-	$effect(() => {
-		console.log('[SearchBar] totalResults:', totalResults, 'currentResult:', currentResult);
-		console.log('[SearchBar] matchesText:', matchesText);
-	});
 </script>
 
 <div class="svelte-lazylog-searchbar">

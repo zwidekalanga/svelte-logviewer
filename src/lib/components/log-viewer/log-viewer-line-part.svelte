@@ -113,13 +113,6 @@
 	}
 
 	let partSegments = $derived(calculateSegments());
-
-	// For debugging
-	$effect(() => {
-		if (partMatches.length > 0) {
-			console.log(`[Part] Part has ${partMatches.length} matches, isActiveMatchPart: ${isActiveMatchPart}`);
-		}
-	});
 </script>
 
 <span

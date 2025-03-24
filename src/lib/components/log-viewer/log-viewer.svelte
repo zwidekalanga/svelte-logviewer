@@ -44,17 +44,8 @@
 	let matches = $state<Match[]>([]);
 	let currentMatchIndex = $state(-1);
 
-	// Add an effect to log match count changes
-	$effect(() => {
-		console.log('[LogViewer] Total matches:', matches.length);
-		console.log('[LogViewer] Current match index:', currentMatchIndex);
-	});
-
 	function handleSearch(event: CustomEvent) {
-		console.log('[Search] Event received:', event.detail);
-		
 		if (!event.detail || typeof event.detail.value !== 'string') {
-			console.error('[Search] Invalid search event format:', event.detail);
 			return;
 		}
 		
@@ -63,16 +54,12 @@
 		
 		// Reset search state if input is too short
 		if (searchText.length < (restProps.searchMinCharacters || 2)) {
-			console.log('[Search] Text too short, resetting matches');
 			matches = [];
 			currentMatchIndex = -1;
 			return;
 		}
 
 		// Find matches at word level, not just line level
-		console.log('[Search] Searching for:', searchText, 'Case insensitive:', currentCaseInsensitive);
-		console.log('[Search] Searching through lines:', lines.length);
-		
 		const tempMatches: Match[] = [];
 		for (let i = 0; i < lines.length; i++) {
 			const line = lines[i];
@@ -104,71 +91,52 @@
 							endIndex: foundIdx + compareSearch.length
 						});
 						
-						console.log(`[Search] Match found in line ${line.number}, part ${partIndex}, pos ${foundIdx}:${foundIdx + compareSearch.length}`);
-						
 						// Move to check for next instance
 						startIdx = foundIdx + 1;
 					}
 				}
-			} else {
-				console.error(`[Search] Line content not an array:`, line.content);
 			}
 		}
 		
 		matches = tempMatches;
-		console.log('[Search] Matches found:', matches.length);
 
 		// Set current match to first match, if any
 		currentMatchIndex = matches.length > 0 ? 0 : -1;
-		console.log('[Search] Current match index:', currentMatchIndex);
 		
 		// Scroll to first match if found
 		if (currentMatchIndex >= 0) {
-			console.log('[Search] Scrolling to first match');
 			scrollToMatch();
 		}
 	}
 
 	function handleNextResult() {
-		console.log('[Search] Next result requested');
 		if (matches.length === 0) {
-			console.log('[Search] No matches to navigate');
 			return;
 		}
 		currentMatchIndex = (currentMatchIndex + 1) % matches.length;
-		console.log('[Search] New match index:', currentMatchIndex);
 		scrollToMatch();
 	}
 
 	function handlePreviousResult() {
-		console.log('[Search] Previous result requested');
 		if (matches.length === 0) {
-			console.log('[Search] No matches to navigate');
 			return;
 		}
 		currentMatchIndex = (currentMatchIndex <= 0) 
 			? matches.length - 1 
 			: currentMatchIndex - 1;
-		console.log('[Search] New match index:', currentMatchIndex);
 		scrollToMatch();
 	}
 
 	function scrollToMatch() {
 		if (currentMatchIndex >= 0 && virtualContainer && matches.length > 0) {
 			const match = matches[currentMatchIndex];
-			console.log('[Search] Scrolling to match:', match);
 			
 			// Find the index of the line in the array
 			const lineIndex = lines.findIndex(line => line.number === match.lineNumber);
-			console.log('[Search] Line index in virtual list:', lineIndex);
 			
 			if (lineIndex !== -1) {
-				console.log('[Search] Scrolling to index:', lineIndex);
 				if (typeof virtualContainer.scrollToIndex === 'function') {
 					virtualContainer.scrollToIndex(lineIndex);
-				} else {
-					console.error('[Search] scrollToIndex is not a function:', virtualContainer);
-					console.log('[Search] virtualContainer:', virtualContainer);
 				}
 			}
 		}
@@ -205,15 +173,9 @@
 	}
 
 	onMount(async () => {
-		console.log('[LogViewer] Component mounted');
-		console.log('[LogViewer] Initial props:', { text, url, caseInsensitive, highlight, searchMinCharacters: restProps.searchMinCharacters });
-		
 		if (text) {
-			console.log('[LogViewer] Processing provided text');
 			lines = processText(text);
-			console.log('[LogViewer] Lines processed:', lines.length);
 		} else if (url) {
-			console.log('[LogViewer] Fetching log from URL:', url);
 			await fetchLog();
 		}
 	});
