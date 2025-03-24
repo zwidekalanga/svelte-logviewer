@@ -1,6 +1,7 @@
 <script lang="ts">
 	import DownArrowIcon from '$lib/components/lucide/icons/down-arrow.svelte';
 	import UpArrowIcon from '$lib/components/lucide/icons/up-arrow.svelte';
+	import { createEventDispatcher, onMount } from 'svelte';
 
 	let {
 		searchText = '',
@@ -11,19 +12,57 @@
 		searchMinCharacters
 	} = $props();
 
+	// Create a Svelte event dispatcher
+	const dispatch = createEventDispatcher();
+	
+	onMount(() => {
+		console.log('[SearchBar] Mounted with props:', { 
+			searchText, 
+			caseInsensitive, 
+			totalResults, 
+			currentResult, 
+			searchMinCharacters 
+		});
+	});
+
 	function handleSearch(event: Event) {
 		const value = (event.target as HTMLInputElement).value;
-		dispatchEvent(new CustomEvent('search', { detail: { value, caseInsensitive } }));
+		// Instead of dispatching to the document, dispatch to the parent
+		dispatch('search', { value, caseInsensitive });
+		console.log('[SearchBar] Dispatched search event:', { value, caseInsensitive });
 	}
 
 	function handleKeyDown(event: KeyboardEvent) {
 		if (event.key === 'Enter') {
 			const eventName = event.shiftKey ? 'previousResult' : 'nextResult';
-			dispatchEvent(new CustomEvent(eventName));
+			// Dispatch to the parent component
+			dispatch(eventName);
+			console.log(`[SearchBar] Dispatched ${eventName} event`);
 		}
 	}
 
-	let matchesText = totalResults > 0 ? `${currentResult + 1} of ${totalResults}` : '0';
+	function handlePreviousClick() {
+		dispatch('previousResult');
+		console.log('[SearchBar] Dispatched previousResult event');
+	}
+
+	function handleNextClick() {
+		dispatch('nextResult');
+		console.log('[SearchBar] Dispatched nextResult event');
+	}
+
+	// Use derived state to update the match count text whenever totalResults or currentResult changes
+	let matchesText = $derived(
+		totalResults > 0 
+			? `${currentResult + 1} of ${totalResults}` 
+			: `0 matches`
+	);
+	
+	// For debugging
+	$effect(() => {
+		console.log('[SearchBar] totalResults:', totalResults, 'currentResult:', currentResult);
+		console.log('[SearchBar] matchesText:', matchesText);
+	});
 </script>
 
 <div class="svelte-lazylog-searchbar">
@@ -40,12 +79,12 @@
 
 	{#if searchText}
 		<span class="results-counter" class:disabled={totalResults === 0}>
-			{matchesText} matches
+			{matchesText}
 		</span>
 
 		<div class="navigation-buttons">
 			<button
-				onclick={() => dispatchEvent(new CustomEvent('previousResult'))}
+				onclick={handlePreviousClick}
 				disabled={totalResults === 0}
 				title="Previous match (Shift+Enter)"
 				aria-label="Previous search result"
@@ -53,7 +92,7 @@
 				<UpArrowIcon color="#d6d6d6" size={18} strokeWidth={3.5} />
 			</button>
 			<button
-				onclick={() => dispatchEvent(new CustomEvent('nextResult'))}
+				onclick={handleNextClick}
 				disabled={totalResults === 0}
 				title="Next match (Enter)"
 				aria-label="Next search result"
