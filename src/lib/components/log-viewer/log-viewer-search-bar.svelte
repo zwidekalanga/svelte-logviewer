@@ -8,22 +8,46 @@
 		totalResults = 0,
 		currentResult = 0,
 		enableHotKeys = undefined,
-		searchMinCharacters
+		searchMinCharacters = 3,
+		onsearch = (detail: { value: string; caseInsensitive: boolean }) => {},
+		onnextResult = () => {},
+		onpreviousResult = () => {}
 	} = $props();
 
 	function handleSearch(event: Event) {
 		const value = (event.target as HTMLInputElement).value;
-		dispatchEvent(new CustomEvent('search', { detail: { value, caseInsensitive } }));
+		
+		// Only call search callback if input meets minimum character requirement
+		// Always dispatch when empty to clear results
+		if (value === '' || value.length >= searchMinCharacters) {
+			onsearch({ value, caseInsensitive });
+		}
 	}
 
 	function handleKeyDown(event: KeyboardEvent) {
 		if (event.key === 'Enter') {
-			const eventName = event.shiftKey ? 'previousResult' : 'nextResult';
-			dispatchEvent(new CustomEvent(eventName));
+			if (event.shiftKey) {
+				onpreviousResult();
+			} else {
+				onnextResult();
+			}
 		}
 	}
 
-	let matchesText = totalResults > 0 ? `${currentResult + 1} of ${totalResults}` : '0';
+	function handlePreviousClick() {
+		onpreviousResult();
+	}
+
+	function handleNextClick() {
+		onnextResult();
+	}
+
+	// Use derived state to update the match count text whenever totalResults or currentResult changes
+	let matchesText = $derived(
+		totalResults > 0 
+			? `${currentResult + 1} of ${totalResults}` 
+			: `0 matches`
+	);
 </script>
 
 <div class="svelte-lazylog-searchbar">
@@ -40,12 +64,16 @@
 
 	{#if searchText}
 		<span class="results-counter" class:disabled={totalResults === 0}>
-			{matchesText} matches
+			{#if searchText.length < searchMinCharacters}
+				Type at least {searchMinCharacters} characters to search
+			{:else}
+				{matchesText}
+			{/if}
 		</span>
 
 		<div class="navigation-buttons">
 			<button
-				onclick={() => dispatchEvent(new CustomEvent('previousResult'))}
+				onclick={handlePreviousClick}
 				disabled={totalResults === 0}
 				title="Previous match (Shift+Enter)"
 				aria-label="Previous search result"
@@ -53,7 +81,7 @@
 				<UpArrowIcon color="#d6d6d6" size={18} strokeWidth={3.5} />
 			</button>
 			<button
-				onclick={() => dispatchEvent(new CustomEvent('nextResult'))}
+				onclick={handleNextClick}
 				disabled={totalResults === 0}
 				title="Next match (Enter)"
 				aria-label="Next search result"
