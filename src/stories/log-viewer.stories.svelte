@@ -330,9 +330,6 @@
 [task 2018-11-14T21:13:44.179Z] creating build/temp.linux-x86_64-2.7/psutil
 [task 2018-11-14T21:13:44.179Z] x86_64-linux-gnu-gcc -pthread -DNDEBUG -g -fwrapv -O2 -Wall -Wstrict-prototypes -fno-strict-aliasing -Wdate-time -D_FORTIFY_SOURCE=2 -g -fstack-protector-strong -Wformat -Werror=format-security -fPIC -DPSUTIL_POSIX=1 -DPSUTIL_VERSION=543 -DPSUTIL_LINUX=1 -I/usr/include/python2.7 -c psutil/_psutil_common.c -o build/temp.linux-x86_64-2.7/psutil/_psutil_common.o
 [task 2018-11-14T21:13:44.179Z] x86_64-linux-gnu-gcc -pthread -DNDEBUG -g -fwrapv -O2 -Wall -Wstrict-prototypes -fno-strict-aliasing -Wdate-time -D_FORTIFY_SOURCE=2 -g -fstack-protector-strong -Wformat -Werror=format-security -fPIC -DPSUTIL_POSIX=1 -DPSUTIL_VERSION=543 -DPSUTIL_LINUX=1 -I/usr/include/python2.7 -c psutil/_psutil_posix.c -o build/temp.linux-x86_64-2.7/psutil/_psutil_posix.o
-[task 2018-11-14T21:13:44.179Z] x86_64-linux-gnu-gcc -pthread -DNDEBUG -g -fwrapv -O2 -Wall -Wstrict-prototypes -fno-strict-aliasing -Wdate-time -D_FORTIFY_SOURCE=2 -g -fstack-protector-strong -Wformat -Werror=format-security -fPIC -DPSUTIL_POSIX=1 -DPSUTIL_VERSION=543 -DPSUTIL_LINUX=1 -I/usr/include/python2.7 -c psutil/_psutil_linux.c -o build/temp.linux-x86_64-2.7/psutil/_psutil_linux.o
-[task 2018-11-14T21:13:44.179Z] creating build/lib.linux-x86_64-2.7
-[task 2018-11-14T21:13:44.179Z] creating build/lib.linux-x86_64-2.7/psutil
 [task 2018-11-14T21:13:44.179Z] x86_64-linux-gnu-gcc -pthread -shared -Wl,-O1 -Wl,-Bsymbolic-functions -Wl,-Bsymbolic-functions -Wl,-z,relro -fno-strict-aliasing -DNDEBUG -g -fwrapv -O2 -Wall -Wstrict-prototypes -Wdate-time -D_FORTIFY_SOURCE=2 -g -fstack-protector-strong -Wformat -Werror=format-security -Wl,-Bsymbolic-functions -Wl,-z,relro -Wdate-time -D_FORTIFY_SOURCE=2 -g -fstack-protector-strong -Wformat -Werror=format-security build/temp.linux-x86_64-2.7/psutil/_psutil_common.o build/temp.linux-x86_64-2.7/psutil/_psutil_posix.o build/temp.linux-x86_64-2.7/psutil/_psutil_linux.o -o build/lib.linux-x86_64-2.7/psutil/_psutil_linux.so
 [task 2018-11-14T21:13:44.180Z] building 'psutil._psutil_posix' extension
 [task 2018-11-14T21:13:44.180Z] x86_64-linux-gnu-gcc -pthread -DNDEBUG -g -fwrapv -O2 -Wall -Wstrict-prototypes -fno-strict-aliasing -Wdate-time -D_FORTIFY_SOURCE=2 -g -fstack-protector-strong -Wformat -Werror=format-security -fPIC -DPSUTIL_POSIX=1 -DPSUTIL_VERSION=543 -DPSUTIL_LINUX=1 -I/usr/include/python2.7 -c psutil/_psutil_common.c -o build/temp.linux-x86_64-2.7/psutil/_psutil_common.o
@@ -347,6 +344,59 @@
 [taskcluster 2018-11-14 21:19:42.433Z] Successful task run with exit code: 0 completed in 669.981 seconds`,
 		highlight: [70, 75],
 		scrollToLine: 77,
+		height: '600px'
+	}}
+/>
+
+<!-- WebSocket basic implementation -->
+<Story
+	name="WebSocket"
+	args={{
+		url: 'wss://echo.websocket.org',
+		websocket: true,
+		caseInsensitive: true,
+		websocketOptions: {
+			reconnect: true,
+			reconnectWait: 2,
+			formatMessage: (message) => `${new Date().toISOString()} [ECHO]: ${message}`
+		},
+		follow: true,
+		height: '600px'
+	}}
+/>
+
+<!-- Example with formatted message -->
+<Story
+	name="WebSocket - Formatted"
+	args={{
+		url: 'wss://api.bitfinex.com/ws/2',
+		websocket: true,
+		websocketOptions: {
+			reconnect: true,
+			onOpen: (e, socket) => {
+				// Subscribe to ticker updates for BTC/USD
+				const msg = JSON.stringify({
+					event: 'subscribe',
+					channel: 'ticker',
+					symbol: 'tBTCUSD'
+				});
+				socket.send(msg);
+			},
+			formatMessage: (message) => {
+				try {
+					const data = JSON.parse(message);
+					if (Array.isArray(data) && data.length > 1 && Array.isArray(data[1])) {
+						// Format ticker data for readability
+						const [bid, bidSize, ask, askSize, dailyChange, dailyChangePerc, lastPrice, volume, high, low] = data[1];
+						return `${new Date().toISOString()} [BTC/USD] Last: $${lastPrice} | Bid: $${bid} | Ask: $${ask} | 24h Change: ${dailyChangePerc.toFixed(2)}%`;
+					}
+					return `${new Date().toISOString()} [BITFINEX]: ${JSON.stringify(data)}`;
+				} catch (e) {
+					return `${new Date().toISOString()} [BITFINEX RAW]: ${message}`;
+				}
+			}
+		},
+		follow: true,
 		height: '600px'
 	}}
 />
