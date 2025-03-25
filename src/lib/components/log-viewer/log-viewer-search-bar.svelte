@@ -9,7 +9,7 @@
 		totalResults = 0,
 		currentResult = 0,
 		enableHotKeys = undefined,
-		searchMinCharacters
+		searchMinCharacters = 3
 	} = $props();
 
 	// Create a Svelte event dispatcher
@@ -17,8 +17,12 @@
 
 	function handleSearch(event: Event) {
 		const value = (event.target as HTMLInputElement).value;
-		// Instead of dispatching to the document, dispatch to the parent
-		dispatch('search', { value, caseInsensitive });
+		
+		// Only dispatch search event if input meets minimum character requirement
+		// Always dispatch when empty to clear results
+		if (value === '' || value.length >= searchMinCharacters) {
+			dispatch('search', { value, caseInsensitive });
+		}
 	}
 
 	function handleKeyDown(event: KeyboardEvent) {
@@ -59,7 +63,11 @@
 
 	{#if searchText}
 		<span class="results-counter" class:disabled={totalResults === 0}>
-			{matchesText}
+			{#if searchText.length < searchMinCharacters}
+				Type at least {searchMinCharacters} characters to search
+			{:else}
+				{matchesText}
+			{/if}
 		</span>
 
 		<div class="navigation-buttons">

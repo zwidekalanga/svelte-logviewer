@@ -1,14 +1,7 @@
 <script lang="ts">
 	import type { LineContent } from '../../../types/log-content.js';
 	import LinePart from './log-viewer-line-part.svelte';
-
-	// Define the Match interface to match what's in log-viewer.svelte
-	interface Match {
-		lineNumber: number;
-		partIndex: number;
-		startIndex: number;
-		endIndex: number;
-	}
+	import type { Match } from './log-viewer-utils.js';
 
 	const {
 		content,
@@ -30,7 +23,7 @@
 
 	// Function to get matches for a specific part
 	function getMatchesForPart(partIndex: number): Match[] {
-		return lineMatches.filter(match => match.partIndex === partIndex);
+		return lineMatches.filter((match: Match) => match.partIndex === partIndex);
 	}
 
 	// Function to check if a part has the active match

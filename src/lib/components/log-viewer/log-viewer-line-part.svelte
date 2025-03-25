@@ -1,13 +1,6 @@
 <script lang="ts">
 	import type { LineContent } from '../../../types/log-content.js';
-
-	// Define the Match interface to match what's in log-viewer.svelte
-	interface Match {
-		lineNumber: number;
-		partIndex: number;
-		startIndex: number;
-		endIndex: number;
-	}
+	import type { Match } from './log-viewer-utils.js';
 
 	const {
 		part,

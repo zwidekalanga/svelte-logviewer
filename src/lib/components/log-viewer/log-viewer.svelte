@@ -4,7 +4,18 @@
 	import { VList } from 'virtua/svelte';
 	import SearchBar from './log-viewer-search-bar.svelte';
 	import Line from './log-viewer-line.svelte';
-	import { DEFAULT_PROPS, processText, isHighlighted } from './log-viewer-utils.js';
+	import { 
+		DEFAULT_PROPS, 
+		processText, 
+		isHighlighted, 
+		findMatches, 
+		getLinesWithMatches,
+		getMatchesForLine,
+		getActiveMatchForLine,
+		getNextMatchIndex,
+		getPreviousMatchIndex,
+		type Match
+	} from './log-viewer-utils.js';
 	import type { LogViewerProps } from '../../../types/log-viewer.js';
 	import type { LogLine } from '../../../types/log-line.js';
 	
@@ -32,15 +43,6 @@
 	// Search state
 	let searchText = $state('');
 	let currentCaseInsensitive = $state(caseInsensitive);
-	
-	// Define a structure to hold each match location
-	interface Match {
-		lineNumber: number;
-		partIndex: number;  // Index of the part in the line.content array
-		startIndex: number; // Start index within the part text
-		endIndex: number;   // End index within the part text
-	}
-	
 	let matches = $state<Match[]>([]);
 	let currentMatchIndex = $state(-1);
 
@@ -52,53 +54,14 @@
 		searchText = event.detail.value;
 		currentCaseInsensitive = !!event.detail.caseInsensitive;
 		
-		// Reset search state if input is too short
-		if (searchText.length < (restProps.searchMinCharacters || 2)) {
-			matches = [];
-			currentMatchIndex = -1;
-			return;
-		}
-
-		// Find matches at word level, not just line level
-		const tempMatches: Match[] = [];
-		for (let i = 0; i < lines.length; i++) {
-			const line = lines[i];
-			
-			// Check each part of the line
-			if (Array.isArray(line.content)) {
-				for (let partIndex = 0; partIndex < line.content.length; partIndex++) {
-					const part = line.content[partIndex];
-					if (!part.text) continue;
-					
-					const contentText = part.text;
-					const searchFor = searchText;
-					
-					// Get comparison values based on case sensitivity
-					const compareText = currentCaseInsensitive ? contentText.toLowerCase() : contentText;
-					const compareSearch = currentCaseInsensitive ? searchFor.toLowerCase() : searchFor;
-					
-					// Find all instances of the search text in this part
-					let startIdx = 0;
-					while (true) {
-						const foundIdx = compareText.indexOf(compareSearch, startIdx);
-						if (foundIdx === -1) break;
-						
-						// Add this match
-						tempMatches.push({
-							lineNumber: line.number,
-							partIndex: partIndex,
-							startIndex: foundIdx,
-							endIndex: foundIdx + compareSearch.length
-						});
-						
-						// Move to check for next instance
-						startIdx = foundIdx + 1;
-					}
-				}
-			}
-		}
-		
-		matches = tempMatches;
+		// Since the SearchBar component now only dispatches when criteria are met,
+		// we don't need to check the minimum character count here
+		matches = findMatches(
+			lines, 
+			searchText, 
+			currentCaseInsensitive, 
+			restProps.searchMinCharacters ?? 3
+		);
 
 		// Set current match to first match, if any
 		currentMatchIndex = matches.length > 0 ? 0 : -1;
@@ -110,20 +73,12 @@
 	}
 
 	function handleNextResult() {
-		if (matches.length === 0) {
-			return;
-		}
-		currentMatchIndex = (currentMatchIndex + 1) % matches.length;
+		currentMatchIndex = getNextMatchIndex(currentMatchIndex, matches.length);
 		scrollToMatch();
 	}
 
 	function handlePreviousResult() {
-		if (matches.length === 0) {
-			return;
-		}
-		currentMatchIndex = (currentMatchIndex <= 0) 
-			? matches.length - 1 
-			: currentMatchIndex - 1;
+		currentMatchIndex = getPreviousMatchIndex(currentMatchIndex, matches.length);
 		scrollToMatch();
 	}
 
@@ -142,11 +97,6 @@
 		}
 	}
 
-	function getLinesWithMatches(): number[] {
-		// Get array of line numbers that have matches
-		return [...new Set(matches.map(match => match.lineNumber))];
-	}
-
 	function isLineHighlighted(lineNumber: number): boolean {
 		// Only check if line is explicitly highlighted by props, not by search
 		return isHighlighted(lineNumber, highlight ?? []);
@@ -156,20 +106,7 @@
 		// Check if this line contains the active match
 		return currentMatchIndex >= 0 && 
 			matches[currentMatchIndex]?.lineNumber === lineNumber &&
-			searchText.length >= (restProps.searchMinCharacters || 2);
-	}
-
-	function getMatchesForLine(lineNumber: number): Match[] {
-		// Return all matches for this line
-		return matches.filter(match => match.lineNumber === lineNumber);
-	}
-
-	function getActiveMatchForLine(lineNumber: number): Match | null {
-		// If the active match is on this line, return it, otherwise null
-		if (currentMatchIndex >= 0 && matches[currentMatchIndex]?.lineNumber === lineNumber) {
-			return matches[currentMatchIndex];
-		}
-		return null;
+			searchText.length >= (restProps.searchMinCharacters ?? 3);
 	}
 
 	onMount(async () => {
@@ -239,11 +176,11 @@
 				line={item} 
 				highlighted={isLineHighlighted(item.number)}
 				searchText={searchText}
-				searchActive={searchText.length >= (restProps.searchMinCharacters || 2)}
+				searchActive={searchText.length >= (restProps.searchMinCharacters ?? 3)}
 				caseInsensitive={currentCaseInsensitive}
 				isActiveMatch={isActiveMatchLine(item.number)}
-				lineMatches={getMatchesForLine(item.number)}
-				activeMatch={getActiveMatchForLine(item.number)}
+				lineMatches={getMatchesForLine(matches, item.number)}
+				activeMatch={getActiveMatchForLine(matches, currentMatchIndex, item.number)}
 			/>
 		{/snippet}
 	</VList>

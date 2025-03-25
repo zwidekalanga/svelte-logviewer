@@ -2,14 +2,7 @@
 	import type { LogLine } from '../../../types/log-line.js';
 	import LineNumber from './log-viewer-line-number.svelte';
 	import LineContent from './log-viewer-line-content.svelte';
-
-	// Define the Match interface to match what's in log-viewer.svelte
-	interface Match {
-		lineNumber: number;
-		partIndex: number;
-		startIndex: number;
-		endIndex: number;
-	}
+	import type { Match } from './log-viewer-utils.js';
 
 	const {
 		line,
