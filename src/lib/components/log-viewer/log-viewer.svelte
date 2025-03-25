@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import type { SvelteComponent } from 'svelte';
 	import { VList } from 'virtua/svelte';
 	import SearchBar from './log-viewer-search-bar.svelte';
@@ -18,6 +18,7 @@
 	} from './log-viewer-utils.js';
 	import type { LogViewerProps } from '../../../types/log-viewer.js';
 	import type { LogLine } from '../../../types/log-line.js';
+	import WebSocketClient from './websocket-client.js';
 	
 	const props = $props();
 
@@ -39,6 +40,7 @@
 
 	let lines = $state<LogLine[]>([]);
 	let virtualContainer: SvelteComponent;
+	let wsClient: WebSocketClient | null = null;
 	
 	// Search state
 	let searchText = $state('');
@@ -59,7 +61,7 @@
 		matches = findMatches(
 			lines, 
 			searchText, 
-			currentCaseInsensitive, 
+			Boolean(currentCaseInsensitive), 
 			restProps.searchMinCharacters ?? 3
 		);
 
@@ -113,9 +115,67 @@
 		if (text) {
 			lines = processText(text);
 		} else if (url) {
-			await fetchLog();
+			if (restProps.websocket) {
+				setupWebSocketConnection();
+			} else {
+				await fetchLog();
+			}
 		}
 	});
+
+	onDestroy(() => {
+		// Clean up WebSocket connection when component is destroyed
+		if (wsClient) {
+			wsClient.disconnect();
+			wsClient = null;
+		}
+	});
+
+	function setupWebSocketConnection() {
+		if (!url) return;
+		
+		wsClient = new WebSocketClient({
+			url,
+			websocketOptions: restProps.websocketOptions,
+			onMessage: handleWebSocketMessage,
+			onError: handleWebSocketError
+		});
+		
+		wsClient.connect();
+	}
+
+	function handleWebSocketMessage(messageText: string) {
+		// Process the incoming message text
+		const newLines = processText(messageText);
+		
+		// Append to existing lines
+		lines = [...lines, ...newLines];
+		
+		// Update search results if search is active
+		if (searchText && searchText.length >= (restProps.searchMinCharacters ?? 3)) {
+			matches = findMatches(
+				lines, 
+				searchText, 
+				Boolean(currentCaseInsensitive), 
+				restProps.searchMinCharacters ?? 3
+			);
+		}
+		
+		// Auto-scroll to bottom if follow is enabled
+		if (restProps.follow && virtualContainer && typeof virtualContainer.scrollToIndex === 'function') {
+			// Schedule this to happen after the UI has updated
+			setTimeout(() => {
+				virtualContainer.scrollToIndex(lines.length - 1);
+			}, 0);
+		}
+	}
+
+	function handleWebSocketError(error: Error) {
+		console.error('WebSocket error in log-viewer:', error);
+		if (typeof restProps.onError === 'function') {
+			restProps.onError(error);
+		}
+	}
 
 	async function handleStreaming(response: Response) {
 		const reader = response.body!.getReader();
