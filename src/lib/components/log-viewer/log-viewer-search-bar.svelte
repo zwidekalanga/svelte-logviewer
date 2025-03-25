@@ -1,7 +1,6 @@
 <script lang="ts">
 	import DownArrowIcon from '$lib/components/lucide/icons/down-arrow.svelte';
 	import UpArrowIcon from '$lib/components/lucide/icons/up-arrow.svelte';
-	import { createEventDispatcher } from 'svelte';
 
 	let {
 		searchText = '',
@@ -9,36 +8,38 @@
 		totalResults = 0,
 		currentResult = 0,
 		enableHotKeys = undefined,
-		searchMinCharacters = 3
+		searchMinCharacters = 3,
+		onsearch = (detail: { value: string; caseInsensitive: boolean }) => {},
+		onnextResult = () => {},
+		onpreviousResult = () => {}
 	} = $props();
-
-	// Create a Svelte event dispatcher
-	const dispatch = createEventDispatcher();
 
 	function handleSearch(event: Event) {
 		const value = (event.target as HTMLInputElement).value;
 		
-		// Only dispatch search event if input meets minimum character requirement
+		// Only call search callback if input meets minimum character requirement
 		// Always dispatch when empty to clear results
 		if (value === '' || value.length >= searchMinCharacters) {
-			dispatch('search', { value, caseInsensitive });
+			onsearch({ value, caseInsensitive });
 		}
 	}
 
 	function handleKeyDown(event: KeyboardEvent) {
 		if (event.key === 'Enter') {
-			const eventName = event.shiftKey ? 'previousResult' : 'nextResult';
-			// Dispatch to the parent component
-			dispatch(eventName);
+			if (event.shiftKey) {
+				onpreviousResult();
+			} else {
+				onnextResult();
+			}
 		}
 	}
 
 	function handlePreviousClick() {
-		dispatch('previousResult');
+		onpreviousResult();
 	}
 
 	function handleNextClick() {
-		dispatch('nextResult');
+		onnextResult();
 	}
 
 	// Use derived state to update the match count text whenever totalResults or currentResult changes

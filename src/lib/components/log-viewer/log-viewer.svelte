@@ -46,13 +46,13 @@
 	let matches = $state<Match[]>([]);
 	let currentMatchIndex = $state(-1);
 
-	function handleSearch(event: CustomEvent) {
-		if (!event.detail || typeof event.detail.value !== 'string') {
+	function handleSearch(detail: { value: string; caseInsensitive: boolean }) {
+		if (!detail) {
 			return;
 		}
 		
-		searchText = event.detail.value;
-		currentCaseInsensitive = !!event.detail.caseInsensitive;
+		searchText = detail.value;
+		currentCaseInsensitive = !!detail.caseInsensitive;
 		
 		// Since the SearchBar component now only dispatches when criteria are met,
 		// we don't need to check the minimum character count here
@@ -156,10 +156,10 @@
 		caseInsensitive={currentCaseInsensitive} 
 		totalResults={matches.length}
 		currentResult={currentMatchIndex >= 0 ? currentMatchIndex : 0}
-		searchMinCharacters={restProps.searchMinCharacters}
-		on:search={handleSearch}
-		on:nextResult={handleNextResult}
-		on:previousResult={handlePreviousResult}
+		searchMinCharacters={restProps.searchMinCharacters ?? 3}
+		onsearch={handleSearch}
+		onnextResult={handleNextResult}
+		onpreviousResult={handlePreviousResult}
 	/>
 
 	<VList
