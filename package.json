@@ -13,9 +13,9 @@
     "format": "prettier --write .",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "test:unit": "vitest",
+    "test:unit": "vitest run-tests/unit",
     "test": "yarn test:unit --run && yarn test:e2e",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test run-tests/e2e"
   },
   "files": [
     "dist",
