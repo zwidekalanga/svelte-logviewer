@@ -6,10 +6,7 @@
 		part,
 		searchText = '',
 		searchActive = false,
-		caseInsensitive = false,
-		isActiveMatch = false,
 		partMatches = [],
-		isActiveMatchPart = false,
 		activeMatch = null
 	} = $props<{
 		part: LineContent;

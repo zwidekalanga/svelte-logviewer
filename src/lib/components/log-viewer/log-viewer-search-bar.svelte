@@ -7,7 +7,6 @@
 		caseInsensitive = false,
 		totalResults = 0,
 		currentResult = 0,
-		enableHotKeys = undefined,
 		searchMinCharacters = 3,
 		onsearch = (detail: { value: string; caseInsensitive: boolean }) => {},
 		onnextResult = () => {},

@@ -1,6 +1,18 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { WebSocketClient } from '../websocket-client.js';
 
+interface WebSocketEvent {
+  data?: unknown;
+  code?: number;
+  reason?: string;
+  message?: string;
+}
+
+// Type for testing private members
+type TestWebSocketClient = WebSocketClient & {
+  _connection: MockWebSocket | null;
+};
+
 // Mock WebSocket
 class MockWebSocket {
   static OPEN = 1;
@@ -8,10 +20,10 @@ class MockWebSocket {
   
   url: string;
   readyState: number = MockWebSocket.CLOSED;
-  onopen: ((event: any) => void) | null = null;
-  onmessage: ((event: any) => void) | null = null;
-  onclose: ((event: any) => void) | null = null;
-  onerror: ((event: any) => void) | null = null;
+  onopen: ((event: WebSocketEvent) => void) | null = null;
+  onmessage: ((event: WebSocketEvent) => void) | null = null;
+  onclose: ((event: WebSocketEvent) => void) | null = null;
+  onerror: ((event: WebSocketEvent) => void) | null = null;
   
   constructor(url: string) {
     this.url = url;
@@ -57,17 +69,16 @@ describe('WebSocketClient', () => {
   });
   
   it('should connect to WebSocket server', () => {
-    const connectSpy = vi.spyOn(wsClient as any, 'connect');
     wsClient.connect();
-    expect(connectSpy).toHaveBeenCalled();
+    expect(wsClient.isConnected()).toBe(true);
   });
   
   it('should handle incoming messages', () => {
     wsClient.connect();
     
     // Access the private connection property for testing
-    const connection = (wsClient as any).connection;
-    connection.onmessage?.({ data: 'test message' });
+    const client = wsClient as unknown as TestWebSocketClient;
+    client._connection!.onmessage?.({ data: 'test message' });
     
     expect(mockOnMessage).toHaveBeenCalledWith('test message');
   });
@@ -75,9 +86,9 @@ describe('WebSocketClient', () => {
   it('should format object messages', () => {
     wsClient.connect();
     
-    const connection = (wsClient as any).connection;
+    const client = wsClient as unknown as TestWebSocketClient;
     const testObj = { test: 'data' };
-    connection.onmessage?.({ data: testObj });
+    client._connection!.onmessage?.({ data: testObj });
     
     expect(mockOnMessage).toHaveBeenCalledWith(JSON.stringify(testObj));
   });
@@ -95,8 +106,8 @@ describe('WebSocketClient', () => {
     
     wsClient.connect();
     
-    const connection = (wsClient as any).connection;
-    connection.onmessage?.({ data: 'raw message' });
+    const client = wsClient as unknown as TestWebSocketClient;
+    client._connection!.onmessage?.({ data: 'raw message' });
     
     expect(customFormatter).toHaveBeenCalledWith('raw message');
     expect(mockOnMessage).toHaveBeenCalledWith('formatted message');
@@ -105,8 +116,8 @@ describe('WebSocketClient', () => {
   it('should handle connection errors', () => {
     wsClient.connect();
     
-    const connection = (wsClient as any).connection;
-    connection.onerror?.({ message: 'connection error' });
+    const client = wsClient as unknown as TestWebSocketClient;
+    client._connection!.onerror?.({ message: 'connection error' });
     
     expect(mockOnError).toHaveBeenCalled();
   });
@@ -115,13 +126,14 @@ describe('WebSocketClient', () => {
     wsClient.connect();
     
     // Mock successful connection
-    (wsClient as any).connection.readyState = MockWebSocket.OPEN;
+    const client = wsClient as unknown as TestWebSocketClient;
+    client._connection!.readyState = MockWebSocket.OPEN;
     
-    const closeSpy = vi.spyOn((wsClient as any).connection, 'close');
+    const closeSpy = vi.spyOn(client._connection!, 'close');
     wsClient.disconnect(1000, 'test reason');
     
     expect(closeSpy).toHaveBeenCalledWith(1000, 'test reason');
-    expect((wsClient as any).connection).toBeNull();
+    expect(client._connection).toBeNull();
   });
   
   it('should report connection status correctly', () => {
@@ -131,7 +143,8 @@ describe('WebSocketClient', () => {
     expect(wsClient.isConnected()).toBe(false);
     
     // Mock successful connection
-    (wsClient as any).connection.readyState = MockWebSocket.OPEN;
+    const client = wsClient as unknown as TestWebSocketClient;
+    client._connection!.readyState = MockWebSocket.OPEN;
     expect(wsClient.isConnected()).toBe(true);
     
     // After disconnection

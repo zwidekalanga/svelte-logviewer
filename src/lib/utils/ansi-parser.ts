@@ -2,7 +2,6 @@
 
 // Use hexadecimal escape sequences instead of octal
 const ESC = '\x1B'; // hexadecimal for escape character (0x1B)
-const CSI = `${ESC}[`; // Control Sequence Introducer
 
 // Color mapping
 const COLORS: Record<string, string> = {

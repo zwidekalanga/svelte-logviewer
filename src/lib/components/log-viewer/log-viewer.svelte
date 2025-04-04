@@ -9,7 +9,6 @@
 		processText, 
 		isHighlighted, 
 		findMatches, 
-		getLinesWithMatches,
 		getMatchesForLine,
 		getActiveMatchForLine,
 		getNextMatchIndex,

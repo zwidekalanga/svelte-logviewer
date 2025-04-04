@@ -6,23 +6,27 @@
  */
 import { SvelteComponentTyped } from "svelte";
 import type { IconNode } from './types';
+
+interface IconAttributes {
+    name?: string;
+    color?: string;
+    size?: number | string;
+    strokeWidth?: number | string;
+    absoluteStrokeWidth?: boolean;
+    iconNode?: IconNode;
+    [key: string]: unknown;
+}
+
 declare const __propDef: {
-    props: {
-        [x: string]: any;
-        name?: string | undefined;
-        color?: string;
-        size?: number | string;
-        strokeWidth?: number | string;
-        absoluteStrokeWidth?: boolean;
-        iconNode?: IconNode;
-    };
+    props: IconAttributes;
     events: {
-        [evt: string]: CustomEvent<any>;
+        [evt: string]: CustomEvent<unknown>;
     };
     slots: {
-        default: {};
+        default: Record<string, never>;
     };
 };
+
 export type IconProps = typeof __propDef.props;
 export type IconEvents = typeof __propDef.events;
 export type IconSlots = typeof __propDef.slots;
