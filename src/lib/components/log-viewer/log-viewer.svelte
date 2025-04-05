@@ -18,6 +18,7 @@
 	import type { LogViewerProps } from '../../../types/log-viewer.js';
 	import type { LogLine } from '../../../types/log-line.js';
 	import WebSocketClient from './websocket-client.js';
+	import EventSourceClient from './eventsource-client.js';
 
 	const props = $props();
 
@@ -40,6 +41,7 @@
 	let lines = $state<LogLine[]>([]);
 	let virtualContainer: SvelteComponent;
 	let wsClient: WebSocketClient | null = null;
+	let esClient: EventSourceClient | null = null;
 
 	// Search state
 	let searchText = $state('');
@@ -118,6 +120,8 @@
 		} else if (url) {
 			if (restProps.websocket) {
 				setupWebSocketConnection();
+			} else if (restProps.eventsource) {
+				setupEventSourceConnection();
 			} else {
 				await fetchLog();
 			}
@@ -125,10 +129,15 @@
 	});
 
 	onDestroy(() => {
-		// Clean up WebSocket connection when component is destroyed
+		// Clean up connections when component is destroyed
 		if (wsClient) {
 			wsClient.disconnect();
 			wsClient = null;
+		}
+
+		if (esClient) {
+			esClient.disconnect();
+			esClient = null;
 		}
 	});
 
@@ -138,14 +147,27 @@
 		wsClient = new WebSocketClient({
 			url,
 			websocketOptions: restProps.websocketOptions,
-			onMessage: handleWebSocketMessage,
-			onError: handleWebSocketError
+			onMessage: handleMessageReceived,
+			onError: handleConnectionError
 		});
 
 		wsClient.connect();
 	}
 
-	function handleWebSocketMessage(messageText: string) {
+	function setupEventSourceConnection() {
+		if (!url) return;
+
+		esClient = new EventSourceClient({
+			url,
+			eventsourceOptions: restProps.eventsourceOptions,
+			onMessage: handleMessageReceived,
+			onError: handleConnectionError
+		});
+
+		esClient.connect();
+	}
+
+	function handleMessageReceived(messageText: string) {
 		// Process the incoming message text
 		const newLines = processText(messageText);
 
@@ -175,8 +197,8 @@
 		}
 	}
 
-	function handleWebSocketError(error: Error) {
-		console.error('WebSocket error in log-viewer:', error);
+	function handleConnectionError(error: Error) {
+		console.error('Connection error in log-viewer:', error);
 		if (typeof restProps.onError === 'function') {
 			restProps.onError(error);
 		}

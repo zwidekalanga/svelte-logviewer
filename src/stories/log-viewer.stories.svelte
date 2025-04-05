@@ -1,4 +1,4 @@
-<script module>
+<script module lang="ts">
 	// Replace your-framework with the name of your framework
 	import { defineMeta } from '@storybook/addon-svelte-csf';
 	import LogViewer from '$lib/components/log-viewer/log-viewer.svelte';
@@ -12,6 +12,8 @@
 		component: LogViewer,
 		tags: ['autodocs']
 	});
+
+	type MessageData = Record<string, unknown>;
 </script>
 
 <!-- Basic example with text -->
@@ -48,10 +50,56 @@
 	args={{
 		websocket: true,
 		url: 'wss://echo.websocket.org',
-		onMessage: (data) => {
+		onMessage: (data: MessageData) => {
 			const { bid, ask, lastPrice } = data;
 			return `BTC/USD: ${bid}/${ask} Last: ${lastPrice}`;
 		},
+		height: '600px'
+	}}
+/>
+
+<!-- Example with EventSource -->
+<Story
+	name="EventSource"
+	args={{
+		eventsource: true,
+		url: 'https://stream.wikimedia.org/v2/stream/recentchange',
+		eventsourceOptions: {
+			withCredentials: false,
+			formatMessage: (message: unknown) => {
+				// Format the SSE message
+				try {
+					// Skip non-data messages or empty events
+					if (!message || typeof message !== 'string' || message === ':ok') {
+						return '';
+					}
+
+					// Try to parse JSON if it's a JSON string
+					const data = JSON.parse(message);
+
+					// Only display actual wiki changes with good data
+					if (data.$schema && data.type && data.title) {
+						const timestamp = new Date(data.meta?.dt || Date.now()).toISOString();
+						const wiki = data.wiki || data.server_name || 'wiki';
+						return `${timestamp} [${wiki}] Page "${data.title}" was ${data.type} by ${data.user || 'unknown'}`;
+					}
+
+					// For other messages, return empty string to skip them
+					return '';
+					// eslint-disable-next-line @typescript-eslint/no-unused-vars
+				} catch (_) {
+					// If parsing fails, return an empty string to skip this message
+					return '';
+				}
+			},
+			reconnect: true,
+			reconnectWait: 2,
+			// Limit to 50 events to see more content
+			maxEvents: 1500,
+			// Add a 500ms delay between events (half second)
+			eventDelay: 500
+		},
+		follow: true,
 		height: '600px'
 	}}
 />

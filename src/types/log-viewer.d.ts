@@ -58,6 +58,16 @@ export interface EventSourceOptions {
 	 * Default is 1s
 	 */
 	reconnectWait?: number;
+	/**
+	 * Maximum number of events to process before closing the connection.
+	 * When undefined, all events will be processed.
+	 */
+	maxEvents?: number;
+	/**
+	 * Delay in milliseconds between processing events.
+	 * When undefined, events are processed as they arrive.
+	 */
+	eventDelay?: number;
 }
 
 export interface LogViewerProps {
