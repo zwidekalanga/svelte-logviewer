@@ -8,14 +8,15 @@
 		totalResults = 0,
 		currentResult = 0,
 		searchMinCharacters = 3,
-		onsearch = (detail: { value: string; caseInsensitive: boolean }) => {},
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		onsearch = ({ value, caseInsensitive }: { value: string; caseInsensitive: boolean }) => {},
 		onnextResult = () => {},
 		onpreviousResult = () => {}
 	} = $props();
 
 	function handleSearch(event: Event) {
 		const value = (event.target as HTMLInputElement).value;
-		
+
 		// Only call search callback if input meets minimum character requirement
 		// Always dispatch when empty to clear results
 		if (value === '' || value.length >= searchMinCharacters) {
@@ -43,9 +44,7 @@
 
 	// Use derived state to update the match count text whenever totalResults or currentResult changes
 	let matchesText = $derived(
-		totalResults > 0 
-			? `${currentResult + 1} of ${totalResults}` 
-			: `0 matches`
+		totalResults > 0 ? `${currentResult + 1} of ${totalResults}` : `0 matches`
 	);
 </script>
 

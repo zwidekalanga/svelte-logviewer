@@ -6,7 +6,10 @@
 	 * See the LICENSE file in the root directory of this source tree.
 	 */
 	import Icon from '../Icon.svelte';
-	const iconNode = [["path", { "d": "M12 5v14" }], ["path", { "d": "m19 12-7 7-7-7" }]];
+	const iconNode = [
+		['path', { d: 'M12 5v14' }],
+		['path', { d: 'm19 12-7 7-7-7' }]
+	];
 
 	/**
 	 * @component @name Square

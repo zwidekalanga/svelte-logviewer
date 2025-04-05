@@ -26,15 +26,15 @@
 </script>
 
 <div class="line" class:highlighted>
-	<LineNumber number={line.number} highlighted={highlighted} />
-	<LineContent 
-		content={line.content} 
-		searchText={searchText}
-		searchActive={searchActive}
-		caseInsensitive={caseInsensitive}
-		isActiveMatch={isActiveMatch}
-		lineMatches={lineMatches}
-		activeMatch={activeMatch}
+	<LineNumber number={line.number} {highlighted} />
+	<LineContent
+		content={line.content}
+		{searchText}
+		{searchActive}
+		{caseInsensitive}
+		{isActiveMatch}
+		{lineMatches}
+		{activeMatch}
 	/>
 </div>
 

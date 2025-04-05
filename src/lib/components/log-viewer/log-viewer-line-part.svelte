@@ -31,24 +31,28 @@
 	function calculateSegments(): Segment[] {
 		// If no search or no text, return the whole text
 		if (!searchActive || !searchText || !part.text) {
-			return [{ 
-				text: part.text || '', 
-				isMatch: false, 
-				isActiveMatch: false,
-				startIndex: 0,
-				endIndex: (part.text || '').length
-			}];
+			return [
+				{
+					text: part.text || '',
+					isMatch: false,
+					isActiveMatch: false,
+					startIndex: 0,
+					endIndex: (part.text || '').length
+				}
+			];
 		}
 
 		// If no matches in this part, return the whole text
 		if (partMatches.length === 0) {
-			return [{ 
-				text: part.text, 
-				isMatch: false, 
-				isActiveMatch: false,
-				startIndex: 0,
-				endIndex: part.text.length
-			}];
+			return [
+				{
+					text: part.text,
+					isMatch: false,
+					isActiveMatch: false,
+					startIndex: 0,
+					endIndex: part.text.length
+				}
+			];
 		}
 
 		// Sort matches by start index
@@ -72,10 +76,11 @@
 			}
 
 			// Add the match
-			const isActive = activeMatch !== null && 
-							 match.lineNumber === activeMatch.lineNumber && 
-							 match.partIndex === activeMatch.partIndex && 
-							 match.startIndex === activeMatch.startIndex;
+			const isActive =
+				activeMatch !== null &&
+				match.lineNumber === activeMatch.lineNumber &&
+				match.partIndex === activeMatch.partIndex &&
+				match.startIndex === activeMatch.startIndex;
 
 			segments.push({
 				text: part.text.substring(match.startIndex, match.endIndex),
@@ -125,13 +130,13 @@
 	span {
 		white-space: pre;
 	}
-	
+
 	.highlight {
 		background-color: #ff0; /* Yellow */
 		color: #000;
 		font-weight: bold;
 	}
-	
+
 	.active-match {
 		background-color: #ff10f0; /* Pink */
 		box-shadow: 0 0 2px 1px #ff10f0;

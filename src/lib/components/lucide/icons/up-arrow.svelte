@@ -6,7 +6,10 @@
 	 * See the LICENSE file in the root directory of this source tree.
 	 */
 	import Icon from '../Icon.svelte';
-	const iconNode = [["path", { "d": "m5 12 7-7 7 7" }], ["path", { "d": "M12 19V5" }]];
+	const iconNode = [
+		['path', { d: 'm5 12 7-7 7 7' }],
+		['path', { d: 'M12 19V5' }]
+	];
 	/**
 	 * @component @name Square
 	 * @description Lucide SVG icon component, renders SVG Element with children.
