@@ -13,9 +13,10 @@
 		"format": "prettier --write .",
 		"storybook": "storybook dev -p 6006",
 		"build-storybook": "storybook build",
-		"test:unit": "vitest run-tests/unit",
+		"test:unit": "vitest tests/unit",
+		"test:unit:shard": "vitest tests/unit --shard",
 		"test": "yarn test:unit --run && yarn test:e2e",
-		"test:e2e": "playwright test run-tests/e2e"
+		"test:e2e": "playwright test tests/e2e"
 	},
 	"files": [
 		"dist",
@@ -65,6 +66,7 @@
 		"eslint-config-prettier": "^9.1.0",
 		"eslint-plugin-svelte": "^2.36.0",
 		"globals": "^15.0.0",
+		"jsdom": "^26.0.0",
 		"picomatch": "3.0.1",
 		"postcss": "^8.4.0",
 		"prettier": "^3.3.2",

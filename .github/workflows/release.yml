@@ -57,14 +57,41 @@ jobs:
       - name: Type check
         run: yarn check
 
-  run-tests:
-    name: Run Tests
+  unit-tests:
+    name: Unit Tests
     needs: code-quality
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        test-type: [unit, e2e]
+        shard: [1, 2, 3, 4]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build the app
+        run: yarn build
+
+      - name: Run Vitest
+        run: yarn test:unit:shard ${{ matrix.shard }}/4 --run
+
+  e2e-tests:
+    name: E2E Tests
+    needs: code-quality
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -79,31 +106,25 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Install Playwright browsers
-        if: matrix.test-type == 'e2e'
         run: yarn playwright install --with-deps chromium
 
       - name: Build the app
         run: yarn build
 
-      - name: Run unit tests
-        if: matrix.test-type == 'unit'
-        run: yarn test
-
       - name: Run E2E tests
-        if: matrix.test-type == 'e2e'
-        run: yarn test:e2e
+        run: yarn playwright test tests/e2e --shard=${{ matrix.shard }}/2
 
       - name: Upload E2E test results
-        if: matrix.test-type == 'e2e' && always()
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.shard }}
           path: playwright-report/
           retention-days: 7
 
   publish:
     name: Publish to NPM
-    needs: run-tests
+    needs: [unit-tests, e2e-tests]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 

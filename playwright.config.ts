@@ -6,5 +6,5 @@ export default defineConfig({
 		port: 4173
 	},
 
-	testDir: 'run-tests/e2e'
+	testDir: 'tests/e2e'
 });
