@@ -139,6 +139,7 @@ jobs:
         with:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
+          scope: '@zwidekalanga'
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
@@ -146,7 +147,26 @@ jobs:
       - name: Build package
         run: yarn build
 
+      - name: Setup Git Identity
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
+      - name: Determine version
+        id: versioning
+        run: |
+          if [[ $(git log -1 --pretty=%B) == *"[major]"* ]]; then
+            echo "VERSION_TYPE=major" >> $GITHUB_OUTPUT
+          elif [[ $(git log -1 --pretty=%B) == *"[minor]"* ]]; then
+            echo "VERSION_TYPE=minor" >> $GITHUB_OUTPUT
+          else
+            echo "VERSION_TYPE=patch" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Bump version
+        run: npm version ${{ steps.versioning.outputs.VERSION_TYPE || 'patch' }} -m "Bump version to %s [skip ci]"
+
       - name: Publish to npm
-        run: yarn publish --access public
+        run: yarn publish --access public --new-version $(node -p "require('./package.json').version")
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
