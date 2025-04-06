@@ -11,11 +11,16 @@ The GitHub Actions workflow automatically publishes a new version of the package
 
 ### Version Strategy
 
-The workflow determines which version to bump (major, minor, patch) based on commit messages:
+The workflow uses a smart versioning strategy:
 
-- If the commit message contains `[major]`, a major version bump will be applied
-- If the commit message contains `[minor]`, a minor version bump will be applied
-- Otherwise, a patch version bump will be applied
+1. It checks the latest version published on NPM
+2. It ensures the local version matches the published version
+3. It then determines which version to bump (major, minor, patch) based on commit messages:
+   - If the commit message contains `[major]`, a major version bump will be applied
+   - If the commit message contains `[minor]`, a minor version bump will be applied
+   - Otherwise, a patch version bump will be applied
+
+This ensures we never encounter "version already exists" errors during publishing.
 
 Examples:
 
@@ -48,9 +53,44 @@ If you need to publish manually:
 # Make sure you're logged in to NPM
 npm login
 
+# Check the latest published version
+npm view @zwidekalanga/svelte-logviewer version
+
+# Update your local version to match or exceed the published version
+npm version [new-version]
+
 # Run the publish command
 yarn publish --access public
 ```
+
+## Troubleshooting
+
+### Version Conflict Errors
+
+If you see an error like:
+
+```
+error Couldn't publish package: "You cannot publish over the previously published versions: 0.0.2."
+```
+
+It means you're trying to publish a version that already exists. To fix this:
+
+1. Check the current published version:
+
+   ```
+   npm view @zwidekalanga/svelte-logviewer version
+   ```
+
+2. Update your local version to a higher number:
+
+   ```
+   npm version [new-version]
+   ```
+
+3. Publish again:
+   ```
+   yarn publish --access public
+   ```
 
 ## Package Information
 
