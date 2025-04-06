@@ -1,58 +1,148 @@
-# create-svelte
+# Svelte LogViewer
 
-Everything you need to build a Svelte library, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
+A powerful Svelte component for loading and viewing log files and text streams in the browser. The LogViewer component can load content from static text, URLs, WebSockets, or EventSource connections and supports ANSI color highlighting.
 
-Read more about creating a library [in the docs](https://svelte.dev/docs/kit/packaging).
-
-## Creating a project
-
-If you're seeing this, you've probably already done this step. Congrats!
+## Installation
 
 ```bash
-# create a new project in the current directory
-npx sv create
+# npm
+npm install @zwidekalanga/svelte-logviewer
 
-# create a new project in my-app
-npx sv create my-app
+# pnpm
+pnpm add @zwidekalanga/svelte-logviewer
+
+# yarn
+yarn add @zwidekalanga/svelte-logviewer
 ```
 
-## Developing
+## Basic Usage
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+Import and use the LogViewer component in your Svelte application:
 
-```bash
-npm run dev
+```svelte
+<script>
+	import { LogViewer } from '@zwidekalanga/svelte-logviewer';
+</script>
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+<LogViewer text="Your log text here..." height="400px" />
 ```
 
-Everything inside `src/lib` is part of your library, everything inside `src/routes` can be used as a showcase or preview app.
+## Use Cases
 
-## Building
+### Display Static Text with ANSI Colors
 
-To build your library:
+For displaying log text with ANSI color codes that you already have in your application:
 
-```bash
-npm run package
+```svelte
+<script>
+	import { LogViewer } from '@zwidekalanga/svelte-logviewer';
+
+	const logText = `\x1b[4;1mRunning "clean:all" (clean) task\x1b[0m\n\x1b[32m>> \x1b[39m0 paths cleaned.`;
+</script>
+
+<LogViewer text={logText} height="600px" />
 ```
 
-To create a production version of your showcase app:
+### Load Logs from a URL
 
-```bash
-npm run build
+Load and display logs from a remote URL:
+
+```svelte
+<script>
+	import { LogViewer } from '@zwidekalanga/svelte-logviewer';
+</script>
+
+<LogViewer url="https://example.com/path/to/your/log-file.log" height="600px" />
 ```
 
-You can preview the production build with `npm run preview`.
+### External Mode
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+Use external mode when you plan to programmatically append content to the log viewer:
 
-## Publishing
+```svelte
+<script>
+	import { LogViewer } from '@zwidekalanga/svelte-logviewer';
+	import { onMount } from 'svelte';
 
-Go into the `package.json` and give your package the desired name through the `"name"` option. Also consider adding a `"license"` field and point it to a `LICENSE` file which you can create from a template (one popular option is the [MIT license](https://opensource.org/license/mit/)).
+	let logViewer;
 
-To publish your library to [npm](https://www.npmjs.com):
+	onMount(() => {
+		// You can later append content programmatically
+		// logViewer.appendLines("New log content...");
+	});
+</script>
 
-```bash
-npm publish
+<LogViewer bind:this={logViewer} external={true} text="Initial log content..." height="600px" />
 ```
+
+### WebSocket Connection
+
+Connect to a WebSocket stream to display real-time logs:
+
+```svelte
+<script>
+	import { LogViewer } from '@zwidekalanga/svelte-logviewer';
+
+	const onMessage = (data) => {
+		const { bid, ask, lastPrice } = data;
+		return `BTC/USD: ${bid}/${ask} Last: ${lastPrice}`;
+	};
+</script>
+
+<LogViewer websocket={true} url="wss://your-websocket-endpoint" {onMessage} height="600px" />
+```
+
+### EventSource (Server-Sent Events)
+
+Connect to an SSE endpoint for streaming logs:
+
+```svelte
+<script>
+	import { LogViewer } from '@zwidekalanga/svelte-logviewer';
+</script>
+
+<LogViewer
+	eventsource={true}
+	url="https://your-eventsource-endpoint"
+	eventsourceOptions={{
+		withCredentials: false,
+		formatMessage: (message) => {
+			// Format or filter the message as needed
+			try {
+				const data = JSON.parse(message);
+				return `${new Date().toISOString()} - ${data.message}`;
+			} catch (_) {
+				return message;
+			}
+		},
+		reconnect: true,
+		maxEvents: 1000
+	}}
+	follow={true}
+	height="600px"
+/>
+```
+
+## Props
+
+The LogViewer component accepts the following props:
+
+| Prop                | Type           | Default  | Description                                   |
+| ------------------- | -------------- | -------- | --------------------------------------------- |
+| `text`              | string         | `''`     | Static text content to display                |
+| `url`               | string         | `''`     | URL to fetch log content from                 |
+| `height`            | string\|number | `'auto'` | Height of the component                       |
+| `width`             | string\|number | `'auto'` | Width of the component                        |
+| `websocket`         | boolean        | `false`  | Set to true when using WebSocket connection   |
+| `eventsource`       | boolean        | `false`  | Set to true when using EventSource connection |
+| `follow`            | boolean        | `false`  | Auto-scroll to the latest content             |
+| `external`          | boolean        | `false`  | Enable appending content programmatically     |
+| `enableSearch`      | boolean        | `true`   | Show search functionality                     |
+| `enableLineNumbers` | boolean        | `true`   | Show line numbers                             |
+| `caseInsensitive`   | boolean        | `false`  | Case insensitive search                       |
+
+For a complete list of all available props and their descriptions, please refer to the [TypeScript definitions](src/types/log-viewer.d.ts).
+
+## License
+
+MIT
