@@ -34,12 +34,12 @@
 
 <span class="line-content">
 	{#each content as part, partIndex}
-		<LinePart 
-			part={part} 
-			searchText={searchText}
-			searchActive={searchActive}
-			caseInsensitive={caseInsensitive}
-			isActiveMatch={isActiveMatch}
+		<LinePart
+			{part}
+			{searchText}
+			{searchActive}
+			{caseInsensitive}
+			{isActiveMatch}
 			partMatches={getMatchesForPart(partIndex)}
 			isActiveMatchPart={isActiveMatchPart(partIndex)}
 			activeMatch={isActiveMatchPart(partIndex) ? activeMatch : null}

@@ -4,12 +4,11 @@
 	import { VList } from 'virtua/svelte';
 	import SearchBar from './log-viewer-search-bar.svelte';
 	import Line from './log-viewer-line.svelte';
-	import { 
-		DEFAULT_PROPS, 
-		processText, 
-		isHighlighted, 
-		findMatches, 
-		getLinesWithMatches,
+	import {
+		DEFAULT_PROPS,
+		processText,
+		isHighlighted,
+		findMatches,
 		getMatchesForLine,
 		getActiveMatchForLine,
 		getNextMatchIndex,
@@ -19,7 +18,8 @@
 	import type { LogViewerProps } from '../../../types/log-viewer.js';
 	import type { LogLine } from '../../../types/log-line.js';
 	import WebSocketClient from './websocket-client.js';
-	
+	import EventSourceClient from './eventsource-client.js';
+
 	const props = $props();
 
 	const {
@@ -41,7 +41,8 @@
 	let lines = $state<LogLine[]>([]);
 	let virtualContainer: SvelteComponent;
 	let wsClient: WebSocketClient | null = null;
-	
+	let esClient: EventSourceClient | null = null;
+
 	// Search state
 	let searchText = $state('');
 	let currentCaseInsensitive = $state(caseInsensitive);
@@ -52,22 +53,22 @@
 		if (!detail) {
 			return;
 		}
-		
+
 		searchText = detail.value;
 		currentCaseInsensitive = !!detail.caseInsensitive;
-		
+
 		// Since the SearchBar component now only dispatches when criteria are met,
 		// we don't need to check the minimum character count here
 		matches = findMatches(
-			lines, 
-			searchText, 
-			Boolean(currentCaseInsensitive), 
+			lines,
+			searchText,
+			Boolean(currentCaseInsensitive),
 			restProps.searchMinCharacters ?? 3
 		);
 
 		// Set current match to first match, if any
 		currentMatchIndex = matches.length > 0 ? 0 : -1;
-		
+
 		// Scroll to first match if found
 		if (currentMatchIndex >= 0) {
 			scrollToMatch();
@@ -87,10 +88,10 @@
 	function scrollToMatch() {
 		if (currentMatchIndex >= 0 && virtualContainer && matches.length > 0) {
 			const match = matches[currentMatchIndex];
-			
+
 			// Find the index of the line in the array
-			const lineIndex = lines.findIndex(line => line.number === match.lineNumber);
-			
+			const lineIndex = lines.findIndex((line) => line.number === match.lineNumber);
+
 			if (lineIndex !== -1) {
 				if (typeof virtualContainer.scrollToIndex === 'function') {
 					virtualContainer.scrollToIndex(lineIndex);
@@ -106,9 +107,11 @@
 
 	function isActiveMatchLine(lineNumber: number): boolean {
 		// Check if this line contains the active match
-		return currentMatchIndex >= 0 && 
+		return (
+			currentMatchIndex >= 0 &&
 			matches[currentMatchIndex]?.lineNumber === lineNumber &&
-			searchText.length >= (restProps.searchMinCharacters ?? 3);
+			searchText.length >= (restProps.searchMinCharacters ?? 3)
+		);
 	}
 
 	onMount(async () => {
@@ -117,6 +120,8 @@
 		} else if (url) {
 			if (restProps.websocket) {
 				setupWebSocketConnection();
+			} else if (restProps.eventsource) {
+				setupEventSourceConnection();
 			} else {
 				await fetchLog();
 			}
@@ -124,45 +129,67 @@
 	});
 
 	onDestroy(() => {
-		// Clean up WebSocket connection when component is destroyed
+		// Clean up connections when component is destroyed
 		if (wsClient) {
 			wsClient.disconnect();
 			wsClient = null;
+		}
+
+		if (esClient) {
+			esClient.disconnect();
+			esClient = null;
 		}
 	});
 
 	function setupWebSocketConnection() {
 		if (!url) return;
-		
+
 		wsClient = new WebSocketClient({
 			url,
 			websocketOptions: restProps.websocketOptions,
-			onMessage: handleWebSocketMessage,
-			onError: handleWebSocketError
+			onMessage: handleMessageReceived,
+			onError: handleConnectionError
 		});
-		
+
 		wsClient.connect();
 	}
 
-	function handleWebSocketMessage(messageText: string) {
+	function setupEventSourceConnection() {
+		if (!url) return;
+
+		esClient = new EventSourceClient({
+			url,
+			eventsourceOptions: restProps.eventsourceOptions,
+			onMessage: handleMessageReceived,
+			onError: handleConnectionError
+		});
+
+		esClient.connect();
+	}
+
+	function handleMessageReceived(messageText: string) {
 		// Process the incoming message text
 		const newLines = processText(messageText);
-		
+
 		// Append to existing lines
 		lines = [...lines, ...newLines];
-		
+
 		// Update search results if search is active
 		if (searchText && searchText.length >= (restProps.searchMinCharacters ?? 3)) {
 			matches = findMatches(
-				lines, 
-				searchText, 
-				Boolean(currentCaseInsensitive), 
+				lines,
+				searchText,
+				Boolean(currentCaseInsensitive),
 				restProps.searchMinCharacters ?? 3
 			);
 		}
-		
+
 		// Auto-scroll to bottom if follow is enabled
-		if (restProps.follow && virtualContainer && typeof virtualContainer.scrollToIndex === 'function') {
+		if (
+			restProps.follow &&
+			virtualContainer &&
+			typeof virtualContainer.scrollToIndex === 'function'
+		) {
 			// Schedule this to happen after the UI has updated
 			setTimeout(() => {
 				virtualContainer.scrollToIndex(lines.length - 1);
@@ -170,8 +197,8 @@
 		}
 	}
 
-	function handleWebSocketError(error: Error) {
-		console.error('WebSocket error in log-viewer:', error);
+	function handleConnectionError(error: Error) {
+		console.error('Connection error in log-viewer:', error);
 		if (typeof restProps.onError === 'function') {
 			restProps.onError(error);
 		}
@@ -211,9 +238,9 @@
 		.map(([k, v]) => `${k}: ${v}`)
 		.join(';')}"
 >
-	<SearchBar 
+	<SearchBar
 		{searchText}
-		caseInsensitive={currentCaseInsensitive} 
+		caseInsensitive={currentCaseInsensitive}
 		totalResults={matches.length}
 		currentResult={currentMatchIndex >= 0 ? currentMatchIndex : 0}
 		searchMinCharacters={restProps.searchMinCharacters ?? 3}
@@ -232,10 +259,10 @@
 			.join(';')}
 	>
 		{#snippet children(item)}
-			<Line 
-				line={item} 
+			<Line
+				line={item}
 				highlighted={isLineHighlighted(item.number)}
-				searchText={searchText}
+				{searchText}
 				searchActive={searchText.length >= (restProps.searchMinCharacters ?? 3)}
 				caseInsensitive={currentCaseInsensitive}
 				isActiveMatch={isActiveMatchLine(item.number)}
