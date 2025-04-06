@@ -11,7 +11,7 @@ The GitHub Actions workflow automatically publishes a new version of the package
 
 ### Version Strategy
 
-The workflow uses a smart versioning strategy:
+The workflow uses a robust versioning strategy:
 
 1. It checks the latest version published on NPM
 2. It ensures the local version matches the published version
@@ -73,7 +73,7 @@ If you see an error like:
 error Couldn't publish package: "You cannot publish over the previously published versions: 0.0.2."
 ```
 
-It means you're trying to publish a version that already exists. To fix this:
+It means you're trying to publish a version that already exists. Our CI system has been improved to handle this automatically, but if you need to fix it manually:
 
 1. Check the current published version:
 
@@ -84,13 +84,22 @@ It means you're trying to publish a version that already exists. To fix this:
 2. Update your local version to a higher number:
 
    ```
-   npm version [new-version]
+   npm version [new-version] --no-git-tag-version
    ```
 
 3. Publish again:
    ```
-   yarn publish --access public
+   yarn publish --access public --new-version $(node -p "require('./package.json').version")
    ```
+
+### GitHub Actions Publish Failures
+
+If the GitHub Actions publish step fails, check:
+
+1. Make sure the `NPM_TOKEN` secret is properly set in your repository
+2. Verify the token has proper permissions on your NPM account
+3. Check that the version in package.json is higher than what's on NPM
+4. If needed, push a new commit with `[patch]`, `[minor]`, or `[major]` in the message to force a version bump
 
 ## Package Information
 
