@@ -188,8 +188,14 @@ jobs:
           npm version ${{ steps.versioning.outputs.VERSION_TYPE || 'patch' }} --no-git-tag-version
           NEW_VERSION=$(node -p "require('./package.json').version")
           echo "New version after bump: $NEW_VERSION"
-          git add package.json
-          git commit -m "Bump version to $NEW_VERSION [skip ci]"
+          # Check if there are changes to commit
+          if git diff --quiet package.json; then
+            echo "No changes to package.json, skipping commit"
+          else
+            git add package.json
+            git config --global --add safe.directory "${GITHUB_WORKSPACE}"
+            git commit -m "Bump version to $NEW_VERSION [skip ci]" || echo "No changes to commit or commit failed - continuing anyway"
+          fi
 
       - name: Publish to npm
         run: yarn publish --access public --no-git-tag-version
