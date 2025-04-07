@@ -40,7 +40,9 @@ export const DEFAULT_PROPS: LogViewerProps = {
 	websocket: false,
 	websocketOptions: {},
 	eventsource: false,
-	eventsourceOptions: {},
+	eventsourceOptions: {
+		maxEmptyEvents: 100 // Default: disconnect after 100 consecutive empty events
+	},
 	width: 'auto',
 	external: false,
 	url: undefined,
@@ -115,18 +117,23 @@ function splitAtVisiblePosition(text: string, maxVisibleLength: number): [string
 	return [firstPart, activeAnsiCodes + secondPart];
 }
 
-export function processText(text: string, wrapLines = false, maxLineLength = 100): LogLine[] {
+export function processText(
+	text: string,
+	wrapLines = false,
+	maxLineLength = 100,
+	startLineNumber = 1
+): LogLine[] {
 	// Standard processing without wrapping
 	if (!wrapLines) {
 		return text.split('\n').map((line, index) => ({
-			number: index + 1,
+			number: startLineNumber + index,
 			content: parseAnsi(line)
 		}));
 	}
 
 	// Process with line wrapping
 	const lines: LogLine[] = [];
-	let lineNumber = 1;
+	let lineNumber = startLineNumber;
 
 	text.split('\n').forEach((line) => {
 		// If the visible length is shorter than maxLineLength, just add it normally

@@ -52,6 +52,17 @@
 	// Apply default values
 	const wrapLines = restProps.wrapLines ?? DEFAULT_PROPS.wrapLines;
 
+	let containerWidth = 0;
+	let characterWidth = 8.4; // Approximate width of a character in Monaco font
+	let containerElement: HTMLElement | null = null;
+	let resizeObserver: ResizeObserver | null = null;
+
+	// Calculate max characters that can fit in the container
+	function getMaxLineLength(): number {
+		if (containerWidth === 0) return 100; // Default fallback
+		return Math.floor(containerWidth / characterWidth);
+	}
+
 	function handleSearch(detail: { value: string; caseInsensitive: boolean }) {
 		if (!detail) {
 			return;
@@ -118,8 +129,13 @@
 	}
 
 	onMount(async () => {
+		// Initialize container width
+		if (containerElement) {
+			containerWidth = containerElement.clientWidth;
+		}
+
 		if (text) {
-			lines = processText(text, wrapLines);
+			lines = processText(text, wrapLines, getMaxLineLength());
 		} else if (url) {
 			if (restProps.websocket) {
 				setupWebSocketConnection();
@@ -128,6 +144,23 @@
 			} else {
 				await fetchLog();
 			}
+		}
+
+		// Set up resize observer to recalculate line wrapping when container size changes
+		if (containerElement) {
+			resizeObserver = new ResizeObserver((entries) => {
+				for (const entry of entries) {
+					containerWidth = entry.contentRect.width;
+					if (wrapLines && lines.length > 0) {
+						// Re-process text when container width changes
+						if (text) {
+							lines = processText(text, wrapLines, getMaxLineLength());
+						}
+					}
+				}
+			});
+
+			resizeObserver.observe(containerElement);
 		}
 	});
 
@@ -141,6 +174,12 @@
 		if (esClient) {
 			esClient.disconnect();
 			esClient = null;
+		}
+
+		// Clean up resize observer
+		if (resizeObserver) {
+			resizeObserver.disconnect();
+			resizeObserver = null;
 		}
 	});
 
@@ -171,8 +210,11 @@
 	}
 
 	function handleMessageReceived(messageText: string) {
+		// Get the next line number based on existing lines
+		const nextLineNumber = lines.length > 0 ? lines[lines.length - 1].number + 1 : 1;
+
 		// Process the incoming message text
-		const newLines = processText(messageText, wrapLines);
+		const newLines = processText(messageText, wrapLines, getMaxLineLength(), nextLineNumber);
 
 		// Append to existing lines
 		lines = [...lines, ...newLines];
@@ -216,7 +258,8 @@
 			if (done) break;
 
 			const chunk = decoder.decode(value, { stream: true });
-			const newLines = processText(chunk, wrapLines);
+			const nextLineNumber = lines.length > 0 ? lines[lines.length - 1].number + 1 : 1;
+			const newLines = processText(chunk, wrapLines, getMaxLineLength(), nextLineNumber);
 			lines = [...lines, ...newLines];
 		}
 	}
@@ -228,7 +271,7 @@
 				await handleStreaming(response);
 			} else {
 				const text = await response.text();
-				lines = processText(text, wrapLines);
+				lines = processText(text, wrapLines, getMaxLineLength());
 			}
 		} catch (error) {
 			console.error('Error fetching log:', error);
@@ -241,6 +284,7 @@
 	style="height: {height}; width: {width}; {Object.entries(style ?? {})
 		.map(([k, v]) => `${k}: ${v}`)
 		.join(';')}"
+	bind:this={containerElement}
 >
 	<SearchBar
 		{searchText}
