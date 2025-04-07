@@ -2,6 +2,39 @@
 
 This project is set up to automatically publish to NPM when changes are pushed to the main branch. Here's how it works and how to configure it:
 
+## Project Structure
+
+The component library is structured following SvelteKit component library best practices:
+
+- `src/lib/` - Contains all component source code
+  - `src/lib/components/` - Component implementations
+  - `src/lib/types/` - TypeScript type definitions
+  - `src/lib/utils/` - Utility functions
+  - `src/lib/index.ts` - Main entry point for exporting components and types
+
+When built, the library is packaged into the `dist/` directory with the following structure:
+
+- `dist/index.js` - Main entry point for the library
+- `dist/index.d.ts` - TypeScript declarations
+- `dist/components/` - Built components
+- `dist/types/` - Type definitions
+- `dist/utils/` - Utility functions
+
+## Importing the Library
+
+The library is configured for easy consumption in other SvelteKit or Svelte projects:
+
+```js
+// Import the main component
+import { LogViewer } from '@zwidekalanga/svelte-logviewer';
+
+// Import specific component directly (if needed)
+import { LogViewer } from '@zwidekalanga/svelte-logviewer/dist/components/log-viewer';
+
+// Import types
+import type { LogViewerProps } from '@zwidekalanga/svelte-logviewer';
+```
+
 ## Automatic Publishing via GitHub Actions
 
 The GitHub Actions workflow automatically publishes a new version of the package to NPM when:
@@ -51,13 +84,16 @@ If you need to publish manually:
 
 ```bash
 # Make sure you're logged in to NPM
-npm login
+yarn npm login
 
 # Check the latest published version
-npm view @zwidekalanga/svelte-logviewer version
+yarn npm view @zwidekalanga/svelte-logviewer version
+
+# Build the package
+yarn package
 
 # Update your local version to match or exceed the published version
-npm version [new-version]
+yarn version [new-version]
 
 # Run the publish command
 yarn publish --access public
@@ -78,18 +114,18 @@ It means you're trying to publish a version that already exists. Our CI system h
 1. Check the current published version:
 
    ```
-   npm view @zwidekalanga/svelte-logviewer version
+   yarn npm view @zwidekalanga/svelte-logviewer version
    ```
 
 2. Update your local version to a higher number:
 
    ```
-   npm version [new-version] --no-git-tag-version
+   yarn version [new-version] --no-git-tag-version
    ```
 
 3. Publish again:
    ```
-   yarn publish --access public --new-version $(node -p "require('./package.json').version")
+   yarn publish --access public
    ```
 
 ### GitHub Actions Publish Failures

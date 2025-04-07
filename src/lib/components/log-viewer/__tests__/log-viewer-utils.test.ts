@@ -9,7 +9,7 @@ import {
 	getNextMatchIndex,
 	getPreviousMatchIndex
 } from '../log-viewer-utils.js';
-import type { LogLine } from '../../../../types/log-line.js';
+import type { LogLine } from '../../../../lib/types/log-line.js';
 
 describe('processText', () => {
 	it('should convert text to log lines', () => {

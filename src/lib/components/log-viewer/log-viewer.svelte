@@ -15,8 +15,8 @@
 		getPreviousMatchIndex,
 		type Match
 	} from './log-viewer-utils.js';
-	import type { LogViewerProps } from '../../../types/log-viewer.js';
-	import type { LogLine } from '../../../types/log-line.js';
+	import type { LogViewerProps } from '../../../lib/types/log-viewer.js';
+	import type { LogLine } from '../../../lib/types/log-line.js';
 	import WebSocketClient from './websocket-client.js';
 	import EventSourceClient from './eventsource-client.js';
 
