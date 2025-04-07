@@ -110,6 +110,11 @@
 	args={{
 		text: `This is a line that should be wrapped when the wrapLines option is enabled. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\nNormal short line\nAnother very long line that demonstrates the wrapping functionality in action. The text should wrap to the next line rather than extending beyond the container causing horizontal scrolling. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.\nThis line includes some ANSI \x1b[31mred text\x1b[0m and \x1b[32mgreen text\x1b[0m that is very long to demonstrate that wrapping works with ANSI color codes too. The colored text should flow naturally to the next line when it reaches the edge of the container.\nThe end.`,
 		wrapLines: true,
-		height: '600px' // Set narrower width to better demonstrate wrapping
+		height: '600px',
+		style: {
+			resize: 'both',
+			overflow: 'auto',
+			border: '1px solid #666'
+		}
 	}}
 />

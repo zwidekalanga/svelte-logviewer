@@ -20,6 +20,8 @@ export class EventSourceClient {
 	private eventCount = 0;
 	private processingTimer: ReturnType<typeof setTimeout> | null = null;
 	private messageQueue: string[] = [];
+	private emptyEventCounter = 0;
+	private maxEmptyEvents = 100; // Default threshold
 
 	/**
 	 * Create a new EventSourceClient
@@ -30,6 +32,11 @@ export class EventSourceClient {
 		this.options = config.eventsourceOptions || {};
 		this.onMessage = config.onMessage;
 		this.onError = config.onError;
+
+		// Set custom threshold if provided
+		if (this.options.maxEmptyEvents) {
+			this.maxEmptyEvents = this.options.maxEmptyEvents;
+		}
 	}
 
 	/**
@@ -37,8 +44,9 @@ export class EventSourceClient {
 	 */
 	connect(): void {
 		try {
-			// Reset event count on new connection
+			// Reset event count and empty event counter on new connection
 			this.eventCount = 0;
+			this.emptyEventCounter = 0;
 
 			// Create EventSource with withCredentials option if provided
 			this.connection = new EventSource(this.url, {
@@ -55,8 +63,29 @@ export class EventSourceClient {
 			this.connection.onmessage = (event: MessageEvent) => {
 				// Skip empty messages or messages that only contain metadata
 				if (!event.data || event.data === ':ok' || event.data.trim() === '') {
+					this.emptyEventCounter++;
+
+					// If receiving too many empty events, disconnect to prevent browser crash
+					if (this.emptyEventCounter > this.maxEmptyEvents) {
+						console.warn(
+							`Received ${this.emptyEventCounter} consecutive empty events, disconnecting`
+						);
+						this.disconnect();
+
+						// Notify of error
+						if (this.onError) {
+							this.onError(
+								new Error(`EventSource disconnected after ${this.emptyEventCounter} empty events`)
+							);
+						}
+						return;
+					}
+
 					return;
 				}
+
+				// Reset empty event counter when we get a valid message
+				this.emptyEventCounter = 0;
 
 				let messageText: string = event.data;
 				let shouldCountEvent = true;

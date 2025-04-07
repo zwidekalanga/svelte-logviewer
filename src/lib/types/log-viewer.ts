@@ -68,6 +68,12 @@ export interface EventSourceOptions {
 	 * When undefined, events are processed as they arrive.
 	 */
 	eventDelay?: number;
+	/**
+	 * Maximum number of consecutive empty events before disconnecting.
+	 * This prevents browser crashes when receiving too many empty events.
+	 * Default is 100.
+	 */
+	maxEmptyEvents?: number;
 }
 
 export interface LogViewerProps {
