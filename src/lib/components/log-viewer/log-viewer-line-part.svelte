@@ -7,7 +7,8 @@
 		searchText = '',
 		searchActive = false,
 		partMatches = [],
-		activeMatch = null
+		activeMatch = null,
+		wrapLines = false
 	} = $props<{
 		part: LineContent;
 		searchText?: string;
@@ -17,6 +18,7 @@
 		partMatches?: Match[];
 		isActiveMatchPart?: boolean;
 		activeMatch?: Match | null;
+		wrapLines?: boolean;
 	}>();
 
 	interface Segment {
@@ -116,6 +118,7 @@
 	style:font-weight={part.bold ? 'bold' : 'normal'}
 	style:font-style={part.italic ? 'italic' : 'normal'}
 	style:text-decoration={part.underline ? 'underline' : 'none'}
+	class:wrapped={wrapLines}
 >
 	{#each partSegments as segment}
 		{#if segment.isMatch}
@@ -129,6 +132,12 @@
 <style>
 	span {
 		white-space: pre;
+	}
+
+	.wrapped {
+		white-space: normal;
+		word-wrap: break-word;
+		word-break: break-all;
 	}
 
 	.highlight {

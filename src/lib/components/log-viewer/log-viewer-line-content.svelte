@@ -10,7 +10,8 @@
 		caseInsensitive = false,
 		isActiveMatch = false,
 		lineMatches = [],
-		activeMatch = null
+		activeMatch = null,
+		wrapLines = false
 	} = $props<{
 		content: LineContent[];
 		searchText?: string;
@@ -19,6 +20,7 @@
 		isActiveMatch?: boolean;
 		lineMatches?: Match[];
 		activeMatch?: Match | null;
+		wrapLines?: boolean;
 	}>();
 
 	// Function to get matches for a specific part
@@ -32,7 +34,7 @@
 	}
 </script>
 
-<span class="line-content">
+<span class="line-content" class:wrapped={wrapLines}>
 	{#each content as part, partIndex}
 		<LinePart
 			{part}
@@ -43,6 +45,7 @@
 			partMatches={getMatchesForPart(partIndex)}
 			isActiveMatchPart={isActiveMatchPart(partIndex)}
 			activeMatch={isActiveMatchPart(partIndex) ? activeMatch : null}
+			{wrapLines}
 		/>
 	{/each}
 </span>
@@ -52,5 +55,11 @@
 		padding-left: 10px;
 		flex: 1;
 		white-space: nowrap;
+	}
+
+	.line-content.wrapped {
+		white-space: normal;
+		word-wrap: break-word;
+		word-break: break-all;
 	}
 </style>
