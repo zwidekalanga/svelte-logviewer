@@ -1,4 +1,4 @@
-import type { WebsocketOptions } from '../../../types/log-viewer.js';
+import type { WebsocketOptions } from '../../../lib/types/log-viewer.js';
 
 export interface WebSocketClientOptions {
 	url: string;

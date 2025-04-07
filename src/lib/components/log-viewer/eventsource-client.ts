@@ -1,4 +1,4 @@
-import type { EventSourceOptions } from '../../../types/log-viewer.js';
+import type { EventSourceOptions } from '../../../lib/types/log-viewer.js';
 
 export interface EventSourceClientOptions {
 	url: string;

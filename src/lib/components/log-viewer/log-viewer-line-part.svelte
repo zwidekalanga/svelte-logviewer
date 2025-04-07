@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { LineContent } from '../../../types/log-content.js';
+	import type { LineContent } from '../../../lib/types/log-content.js';
 	import type { Match } from './log-viewer-utils.js';
 
 	const {

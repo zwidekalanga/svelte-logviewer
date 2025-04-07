@@ -172,7 +172,7 @@ export interface LogViewerProps {
 	 * Is passed a single argument which is an `Immutable.Range`
 	 * of the highlighted line numbers.
 	 */
-	onHighlight?: (range: Immutable.Seq.Indexed<number>) => unknown;
+	onHighlight?: (range: number | number[]) => unknown;
 	/**
 	 * Execute a function if/when the provided `url` has completed loading.
 	 */
@@ -242,7 +242,7 @@ export interface LogViewerProps {
 	 */
 	eventsource?: boolean;
 	/**
-	 * Options o	bject which will be passed through to evensource.
+	 * Options object which will be passed through to evensource.
 	 */
 	eventsourceOptions?: EventSourceOptions;
 	/**

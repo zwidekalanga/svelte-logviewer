@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { LogLine } from '../../../types/log-line.js';
+	import type { LogLine } from '../../../lib/types/log-line.js';
 	import LineNumber from './log-viewer-line-number.svelte';
 	import LineContent from './log-viewer-line-content.svelte';
 	import type { Match } from './log-viewer-utils.js';

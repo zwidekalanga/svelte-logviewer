@@ -1,5 +1,5 @@
-import type { LogViewerProps } from '../../../types/log-viewer.js';
-import type { LogLine } from '../../../types/log-line.js';
+import type { LogViewerProps } from '../../../lib/types/log-viewer.js';
+import type { LogLine } from '../../../lib/types/log-line.js';
 import { parseAnsi } from '../../utils/ansi-parser.js';
 
 // Define a structure to hold each match location
