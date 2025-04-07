@@ -47,11 +47,119 @@ export const DEFAULT_PROPS: LogViewerProps = {
 	text: undefined
 };
 
-export function processText(text: string): LogLine[] {
-	return text.split('\n').map((line, index) => ({
-		number: index + 1,
-		content: parseAnsi(line)
-	}));
+// Helper function to get visible length of text excluding ANSI codes
+function getVisibleLength(text: string): number {
+	// Remove all ANSI escape sequences - using ESC constant to avoid linting error
+	const ESC = '\u001b'; // ESC character
+	return text.replace(new RegExp(`${ESC}\\[[0-9;]*[a-zA-Z]`, 'g'), '').length;
+}
+
+// Helper function to get active ANSI codes at a position
+function getActiveAnsiCodes(text: string, position: number): string {
+	const codes: string[] = [];
+	const ESC = '\u001b'; // ESC character
+	const regex = new RegExp(`${ESC}\\[([0-9;]*)([a-zA-Z])`, 'g');
+	let match;
+
+	while ((match = regex.exec(text)) !== null) {
+		if (match.index > position) break;
+		if (match[2] === 'm') {
+			if (match[1] === '0' || match[1] === '') {
+				codes.length = 0; // Reset
+			} else {
+				codes.push(match[0]);
+			}
+		}
+	}
+
+	return codes.join('');
+}
+
+// Helper function to split text at a visible position while preserving ANSI codes
+function splitAtVisiblePosition(text: string, maxVisibleLength: number): [string, string] {
+	let visibleLength = 0;
+	let actualPosition = 0;
+	let inEscapeSequence = false;
+	const ESC = '\u001b'; // ESC character
+
+	for (let i = 0; i < text.length; i++) {
+		if (text[i] === ESC) {
+			inEscapeSequence = true;
+			continue;
+		}
+
+		if (inEscapeSequence) {
+			if (text[i] === 'm') {
+				inEscapeSequence = false;
+			}
+			continue;
+		}
+
+		visibleLength++;
+		if (visibleLength > maxVisibleLength) {
+			actualPosition = i;
+			break;
+		}
+	}
+
+	if (actualPosition === 0) {
+		actualPosition = text.length;
+	}
+
+	const firstPart = text.slice(0, actualPosition);
+	const secondPart = text.slice(actualPosition);
+
+	// Get active ANSI codes at the split point
+	const activeAnsiCodes = getActiveAnsiCodes(firstPart, firstPart.length);
+
+	return [firstPart, activeAnsiCodes + secondPart];
+}
+
+export function processText(text: string, wrapLines = false, maxLineLength = 100): LogLine[] {
+	// Standard processing without wrapping
+	if (!wrapLines) {
+		return text.split('\n').map((line, index) => ({
+			number: index + 1,
+			content: parseAnsi(line)
+		}));
+	}
+
+	// Process with line wrapping
+	const lines: LogLine[] = [];
+	let lineNumber = 1;
+
+	text.split('\n').forEach((line) => {
+		// If the visible length is shorter than maxLineLength, just add it normally
+		if (getVisibleLength(line) <= maxLineLength) {
+			lines.push({
+				number: lineNumber++,
+				content: parseAnsi(line)
+			});
+			return;
+		}
+
+		let remainingText = line;
+		let isFirstChunk = true;
+
+		while (remainingText.length > 0) {
+			const availableLength = isFirstChunk ? maxLineLength : maxLineLength - 2; // Account for prefix
+			const [chunk, remaining] = splitAtVisiblePosition(remainingText, availableLength);
+			const prefix = isFirstChunk ? '' : '↪ ';
+
+			lines.push({
+				number: lineNumber++,
+				content: parseAnsi(prefix + chunk)
+			});
+
+			remainingText = remaining;
+			isFirstChunk = false;
+
+			// Break if we can't make any more progress
+			if (chunk.length === 0) break;
+		}
+	});
+
+	return lines;
 }
 
 export function isHighlighted(lineNumber: number, highlight: number | number[]): boolean {

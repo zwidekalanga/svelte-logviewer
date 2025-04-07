@@ -49,6 +49,9 @@
 	let matches = $state<Match[]>([]);
 	let currentMatchIndex = $state(-1);
 
+	// Apply default values
+	const wrapLines = restProps.wrapLines ?? DEFAULT_PROPS.wrapLines;
+
 	function handleSearch(detail: { value: string; caseInsensitive: boolean }) {
 		if (!detail) {
 			return;
@@ -116,7 +119,7 @@
 
 	onMount(async () => {
 		if (text) {
-			lines = processText(text);
+			lines = processText(text, wrapLines);
 		} else if (url) {
 			if (restProps.websocket) {
 				setupWebSocketConnection();
@@ -169,7 +172,7 @@
 
 	function handleMessageReceived(messageText: string) {
 		// Process the incoming message text
-		const newLines = processText(messageText);
+		const newLines = processText(messageText, wrapLines);
 
 		// Append to existing lines
 		lines = [...lines, ...newLines];
@@ -213,7 +216,8 @@
 			if (done) break;
 
 			const chunk = decoder.decode(value, { stream: true });
-			processText(chunk);
+			const newLines = processText(chunk, wrapLines);
+			lines = [...lines, ...newLines];
 		}
 	}
 
@@ -224,7 +228,7 @@
 				await handleStreaming(response);
 			} else {
 				const text = await response.text();
-				lines = processText(text);
+				lines = processText(text, wrapLines);
 			}
 		} catch (error) {
 			console.error('Error fetching log:', error);
@@ -268,6 +272,7 @@
 				isActiveMatch={isActiveMatchLine(item.number)}
 				lineMatches={getMatchesForLine(matches, item.number)}
 				activeMatch={getActiveMatchForLine(matches, currentMatchIndex, item.number)}
+				{wrapLines}
 			/>
 		{/snippet}
 	</VList>
@@ -285,7 +290,6 @@
 
 	:global(.svelte-lazylog-content) {
 		height: 100%;
-		white-space: pre;
 		scrollbar-color: #666 #222; /* For Firefox */
 	}
 </style>

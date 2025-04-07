@@ -12,7 +12,8 @@
 		caseInsensitive = false,
 		isActiveMatch = false,
 		lineMatches = [],
-		activeMatch = null
+		activeMatch = null,
+		wrapLines = false
 	} = $props<{
 		line: LogLine;
 		highlighted?: boolean;
@@ -22,10 +23,11 @@
 		isActiveMatch?: boolean;
 		lineMatches?: Match[];
 		activeMatch?: Match | null;
+		wrapLines?: boolean;
 	}>();
 </script>
 
-<div class="line" class:highlighted>
+<div class="line" class:highlighted class:wrapped={wrapLines}>
 	<LineNumber number={line.number} {highlighted} />
 	<LineContent
 		content={line.content}
@@ -35,6 +37,7 @@
 		{isActiveMatch}
 		{lineMatches}
 		{activeMatch}
+		{wrapLines}
 	/>
 </div>
 
@@ -44,6 +47,12 @@
 		/* font-family: monospace; */
 		line-height: 1.5;
 		white-space: nowrap;
+	}
+
+	.line.wrapped {
+		white-space: normal;
+		word-wrap: break-word;
+		word-break: break-all;
 	}
 
 	.line:hover {
