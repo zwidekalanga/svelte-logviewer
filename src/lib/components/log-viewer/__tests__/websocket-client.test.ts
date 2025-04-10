@@ -10,7 +10,7 @@ interface WebSocketEvent {
 
 // Type for testing private members
 type TestWebSocketClient = WebSocketClient & {
-	_connection: MockWebSocket | null;
+	connection: MockWebSocket | null;
 };
 
 // Mock WebSocket
