@@ -137,10 +137,8 @@
 		if (text) {
 			lines = processText(text, wrapLines, getMaxLineLength());
 		} else if (url) {
-			if (restProps.websocket) {
-				setupWebSocketConnection();
-			} else if (restProps.eventsource) {
-				setupEventSourceConnection();
+			if (restProps.websocket || restProps.eventsource) {
+				setupConnection();
 			} else {
 				await fetchLog();
 			}
@@ -183,30 +181,26 @@
 		}
 	});
 
-	function setupWebSocketConnection() {
+	function setupConnection() {
 		if (!url) return;
 
-		wsClient = new WebSocketClient({
-			url,
-			websocketOptions: restProps.websocketOptions,
-			onMessage: handleMessageReceived,
-			onError: handleConnectionError
-		});
-
-		wsClient.connect();
-	}
-
-	function setupEventSourceConnection() {
-		if (!url) return;
-
-		esClient = new EventSourceClient({
-			url,
-			eventsourceOptions: restProps.eventsourceOptions,
-			onMessage: handleMessageReceived,
-			onError: handleConnectionError
-		});
-
-		esClient.connect();
+		if (restProps.websocket) {
+			wsClient = new WebSocketClient({
+				url,
+				websocketOptions: restProps.websocketOptions,
+				onMessage: handleMessageReceived,
+				onError: handleConnectionError
+			});
+			wsClient.connect();
+		} else if (restProps.eventsource) {
+			esClient = new EventSourceClient({
+				url,
+				eventsourceOptions: restProps.eventsourceOptions,
+				onMessage: handleMessageReceived,
+				onError: handleConnectionError
+			});
+			esClient.connect();
+		}
 	}
 
 	function handleMessageReceived(messageText: string) {

@@ -1,22 +1,16 @@
 import type { EventSourceOptions } from '../../../lib/types/log-viewer.js';
+import ConnectionClient from './connection-client.js';
+import type { ConnectionClientOptions } from './connection-client.js';
 
-export interface EventSourceClientOptions {
-	url: string;
+export interface EventSourceClientOptions extends ConnectionClientOptions {
 	eventsourceOptions?: EventSourceOptions;
-	onMessage: (message: string) => void;
-	onError?: (error: Error) => void;
 }
 
 /**
  * EventSourceClient handles the connection and communication with Server-Sent Events endpoints
  */
-export class EventSourceClient {
-	private url: string;
-	private options: EventSourceOptions;
+export class EventSourceClient extends ConnectionClient {
 	private connection: EventSource | null = null;
-	private onMessage: (message: string) => void;
-	private onError?: (error: Error) => void;
-	private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 	private eventCount = 0;
 	private processingTimer: ReturnType<typeof setTimeout> | null = null;
 	private messageQueue: string[] = [];
@@ -28,14 +22,16 @@ export class EventSourceClient {
 	 * @param {EventSourceClientOptions} config - Configuration options
 	 */
 	constructor(config: EventSourceClientOptions) {
-		this.url = config.url;
-		this.options = config.eventsourceOptions || {};
-		this.onMessage = config.onMessage;
-		this.onError = config.onError;
+		super({
+			url: config.url,
+			options: config.eventsourceOptions || {},
+			onMessage: config.onMessage,
+			onError: config.onError
+		});
 
 		// Set custom threshold if provided
-		if (this.options.maxEmptyEvents) {
-			this.maxEmptyEvents = this.options.maxEmptyEvents;
+		if ((this.options as EventSourceOptions).maxEmptyEvents) {
+			this.maxEmptyEvents = (this.options as EventSourceOptions).maxEmptyEvents;
 		}
 	}
 
@@ -73,11 +69,9 @@ export class EventSourceClient {
 						this.disconnect();
 
 						// Notify of error
-						if (this.onError) {
-							this.onError(
-								new Error(`EventSource disconnected after ${this.emptyEventCounter} empty events`)
-							);
-						}
+						this.handleConnectionError(
+							new Error(`EventSource disconnected after ${this.emptyEventCounter} empty events`)
+						);
 						return;
 					}
 
@@ -87,24 +81,13 @@ export class EventSourceClient {
 				// Reset empty event counter when we get a valid message
 				this.emptyEventCounter = 0;
 
-				let messageText: string = event.data;
+				// Format the message using the base class method
+				const messageText: string = this.formatMessageData(event.data);
 				let shouldCountEvent = true;
 
-				// Use custom formatter if provided
-				if (typeof this.options.formatMessage === 'function') {
-					messageText = this.options.formatMessage(event.data);
-					// If the formatter returns an empty string, don't count this as an event
-					if (!messageText || messageText.trim() === '') {
-						shouldCountEvent = false;
-					}
-				} else if (typeof event.data === 'object') {
-					// Try to convert object to string if not handled by formatter
-					try {
-						messageText = JSON.stringify(event.data);
-					} catch (err) {
-						console.error('Failed to stringify message data:', err);
-						shouldCountEvent = false;
-					}
+				// If the formatter returns an empty string, don't count this as an event
+				if (!messageText || messageText.trim() === '') {
+					shouldCountEvent = false;
 				}
 
 				// Only increment event count for valid, non-empty messages
@@ -144,9 +127,7 @@ export class EventSourceClient {
 					this.options.onError(e);
 				}
 
-				if (this.onError) {
-					this.onError(new Error('EventSource connection error'));
-				}
+				this.handleConnectionError(new Error('EventSource connection error'));
 
 				// Auto-reconnect logic
 				// Unlike WebSocket, EventSource automatically reconnects,
@@ -177,9 +158,7 @@ export class EventSourceClient {
 			}
 		} catch (error) {
 			console.error('Error setting up EventSource:', error);
-			if (this.onError) {
-				this.onError(error instanceof Error ? error : new Error(String(error)));
-			}
+			this.handleConnectionError(error instanceof Error ? error : new Error(String(error)));
 		}
 	}
 
