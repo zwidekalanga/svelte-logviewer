@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest';
 
 // Import in different ways to test various import formats
-import { LogViewer } from '../../dist/index.js';
 import { LogViewerLine } from '../../dist/components/log-viewer/index.js';
-import * as packageExports from '../../dist/index.js';
 import * as logViewerExports from '../../dist/components/log-viewer/index.js';
+import { LogViewer } from '../../dist/index.js';
+import * as packageExports from '../../dist/index.js';
 
 describe('Package import formats', () => {
 	it('should allow importing from main package export', () => {

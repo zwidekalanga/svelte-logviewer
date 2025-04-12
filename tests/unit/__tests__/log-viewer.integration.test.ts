@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+
 import { processText, isHighlighted, findMatches } from '../log-viewer-utils.js';
 
 // For Svelte 5 compatibility, we'll test utilities individually instead

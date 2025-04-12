@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach } from 'vitest';
 import fs from 'fs';
 import path from 'path';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 interface PackageJson {
 	svelte: string;

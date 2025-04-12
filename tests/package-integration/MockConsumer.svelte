@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { LogViewer } from '../../dist/index.js';
+
 	import type { LogViewerProps } from '../../dist/index.js';
 
 	export let sampleText = 'Line 1\nLine 2\nLine 3';
