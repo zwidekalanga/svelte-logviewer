@@ -1,0 +1,51 @@
+name: E2E Tests
+
+on:
+  # Allow manual triggering
+  workflow_dispatch:
+  # Allow this workflow to be called by other workflows
+  workflow_call:
+    outputs:
+      result:
+        description: 'Result of the E2E tests'
+        value: ${{ jobs.e2e-tests.outputs.result }}
+
+jobs:
+  e2e-tests:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    outputs:
+      result: ${{ job.status }}
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: yarn playwright install --with-deps chromium
+
+      - name: Build the app
+        run: yarn build
+
+      - name: Run E2E tests
+        run: yarn playwright test tests/e2e --shard=${{ matrix.shard }}/2
+
+      - name: Upload E2E test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ matrix.shard }}
+          path: playwright-report/
+          retention-days: 7

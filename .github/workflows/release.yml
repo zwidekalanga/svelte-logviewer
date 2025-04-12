@@ -1,10 +1,23 @@
 name: Build, Test and Publish
 
+# Workflow for the Feature Branches → Development Branch → Main Branch → NPM Release process
+#
+# This workflow:
+# 1. Runs build and code quality checks
+# 2. Calls separate workflows for unit tests and E2E tests
+# 3. Only publishes to NPM when code is pushed to main (typically via a PR from development)
+# 4. Handles version updates in two ways:
+#    - Preferred: Update version in package.json as part of the PR from development to main
+#    - Fallback: Automatically determine version bump based on commit messages
+#
+# For the preferred approach, update the version in package.json in your PR from development to main.
+# The workflow will detect this change and use it instead of determining a version bump automatically.
+
 on:
   pull_request:
-    branches: [main]
+    branches: [main, development]
   push:
-    branches: [main]
+    branches: [main, development]
 
 jobs:
   build:
@@ -60,74 +73,15 @@ jobs:
       - name: Type check
         run: yarn check
 
-  unit-tests:
-    name: Unit Tests
+  # Call the combined tests workflow
+  tests:
+    name: Unit and E2E Tests
     needs: code-quality
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1, 2, 3, 4]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'yarn'
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
-      - name: Build the app
-        run: yarn build
-
-      - name: Run Vitest
-        run: yarn test:unit:shard ${{ matrix.shard }}/4 --run
-
-  e2e-tests:
-    name: E2E Tests
-    needs: code-quality
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1, 2]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'yarn'
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
-      - name: Install Playwright browsers
-        run: yarn playwright install --with-deps chromium
-
-      - name: Build the app
-        run: yarn build
-
-      - name: Run E2E tests
-        run: yarn playwright test tests/e2e --shard=${{ matrix.shard }}/2
-
-      - name: Upload E2E test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report-${{ matrix.shard }}
-          path: playwright-report/
-          retention-days: 7
+    uses: ./.github/workflows/tests.yml
 
   publish:
     name: Publish to NPM
-    needs: [unit-tests, e2e-tests]
+    needs: [tests]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
@@ -168,10 +122,21 @@ jobs:
           echo "latest_version=$LATEST_VERSION" >> $GITHUB_OUTPUT
           echo "Latest published version: $LATEST_VERSION"
 
+      # In the new workflow (Feature → Development → Main → NPM Release),
+      # version updates should be part of the PR from development to main.
+      # This step is kept for backward compatibility and will be used if
+      # the version wasn't already updated in the PR.
       - name: Determine version bump type
         id: versioning
         run: |
-          if [[ $(git log -1 --pretty=%B) == *"[major]"* ]]; then
+          # Check if version was already updated in the PR
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          if [[ "$CURRENT_VERSION" != "${{ steps.npm_version.outputs.latest_version }}" && "${{ steps.npm_version.outputs.latest_version }}" != "0.0.0" ]]; then
+            echo "Version was already updated in PR to: $CURRENT_VERSION"
+            echo "VERSION_TYPE=none" >> $GITHUB_OUTPUT
+            echo "CUSTOM_VERSION=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          # Otherwise determine version bump from commit messages
+          elif [[ $(git log -1 --pretty=%B) == *"[major]"* ]]; then
             echo "VERSION_TYPE=major" >> $GITHUB_OUTPUT
             echo "Determined version bump: MAJOR"
           elif [[ $(git log -1 --pretty=%B) == *"[minor]"* ]]; then
@@ -190,22 +155,31 @@ jobs:
 
       - name: Bump version
         run: |
-          npm version ${{ steps.versioning.outputs.VERSION_TYPE || 'patch' }} --no-git-tag-version
-          NEW_VERSION=$(node -p "require('./package.json').version")
-          echo "New version after bump: $NEW_VERSION"
-          # Check if there are changes to commit
-          if git diff --exit-code package.json; then
-            echo "No changes to package.json, skipping commit"
+          if [[ "${{ steps.versioning.outputs.VERSION_TYPE }}" == "none" ]]; then
+            # Use the version that was already set in the PR
+            echo "Using version from PR: ${{ steps.versioning.outputs.CUSTOM_VERSION }}"
+            NEW_VERSION="${{ steps.versioning.outputs.CUSTOM_VERSION }}"
           else
-            git add package.json
-            git config --global --add safe.directory "${GITHUB_WORKSPACE}"
-            git commit -m "Bump version to $NEW_VERSION [skip ci]" || echo "No changes to commit or commit failed - continuing anyway"
+            # Bump version according to determined type
+            npm version ${{ steps.versioning.outputs.VERSION_TYPE || 'patch' }} --no-git-tag-version
+            NEW_VERSION=$(node -p "require('./package.json').version")
+            echo "New version after bump: $NEW_VERSION"
+
+            # Check if there are changes to commit
+            if git diff --exit-code package.json; then
+              echo "No changes to package.json, skipping commit"
+            else
+              git add package.json
+              git config --global --add safe.directory "${GITHUB_WORKSPACE}"
+              git commit -m "Bump version to $NEW_VERSION [skip ci]" || echo "No changes to commit or commit failed - continuing anyway"
+            fi
           fi
+          # Export the version for use in subsequent steps
+          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
 
       - name: Publish to npm
         run: |
-          NEW_VERSION=$(node -p "require('./package.json').version")
-          echo "Publishing version: $NEW_VERSION"
-          yarn publish --access public --no-git-tag-version --new-version $NEW_VERSION
+          echo "Publishing version: ${{ env.NEW_VERSION }}"
+          yarn publish --access public --no-git-tag-version --new-version ${{ env.NEW_VERSION }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
