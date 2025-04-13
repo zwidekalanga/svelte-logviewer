@@ -23,7 +23,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '20.18'
           cache: 'yarn'
 
       - name: Cache dependencies
@@ -58,7 +58,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '20.18'
           cache: 'yarn'
 
       - name: Cache dependencies
@@ -91,14 +91,14 @@ jobs:
     needs: [setup, build]
     uses: ./.github/workflows/vitest.yml
     with:
-      node-version: '20'
+      node-version: '20.18'
 
   e2e_tests:
     name: E2E Tests
     needs: [setup, build]
     uses: ./.github/workflows/e2e-tests.yml
     with:
-      node-version: '20'
+      node-version: '20.18'
 
   docs:
     name: Build Documentation
@@ -112,7 +112,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '20.18'
           cache: 'yarn'
 
       - name: Cache dependencies
