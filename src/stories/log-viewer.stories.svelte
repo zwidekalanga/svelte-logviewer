@@ -1,6 +1,7 @@
 <script module lang="ts">
 	// Replace your-framework with the name of your framework
 	import { defineMeta } from '@storybook/addon-svelte-csf';
+
 	import LogViewer from '$lib/components/log-viewer/log-viewer.svelte';
 
 	/**

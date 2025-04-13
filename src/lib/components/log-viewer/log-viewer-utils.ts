@@ -1,6 +1,7 @@
-import type { LogViewerProps } from '../../../lib/types/log-viewer.js';
-import type { LogLine } from '../../../lib/types/log-line.js';
 import { parseAnsi } from '../../utils/ansi-parser.js';
+
+import type { LogLine } from '$lib/types/log-line.js';
+import type { LogViewerProps } from '$lib/types/log-viewer.js';
 
 // Define a structure to hold each match location
 export interface Match {

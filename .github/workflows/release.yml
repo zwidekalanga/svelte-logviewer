@@ -1,211 +1,30 @@
-name: Build, Test and Publish
+name: Legacy Build, Test and Publish
+# This workflow is being replaced by the new CI/CD pipeline in ci.yml and changesets.yml
+# It is kept here for reference and will be removed in a future update
 
 on:
-  pull_request:
-    branches: [main]
-  push:
-    branches: [main]
+  workflow_dispatch:
 
 jobs:
-  build:
-    name: Build
+  redirect:
+    name: Redirect to New Workflow
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: ${{ github.ref }}
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'yarn'
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
-      - name: Build package
-        run: yarn build
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-artifacts
-          path: dist/
-          retention-days: 1
-
-  code-quality:
-    name: Code Quality
-    runs-on: ubuntu-latest
-    needs: build
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'yarn'
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
-      - name: Lint code
-        run: yarn lint
-
-      - name: Type check
-        run: yarn check
-
-  unit-tests:
-    name: Unit Tests
-    needs: code-quality
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1, 2, 3, 4]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'yarn'
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
-      - name: Build the app
-        run: yarn build
-
-      - name: Run Vitest
-        run: yarn test:unit:shard ${{ matrix.shard }}/4 --run
-
-  e2e-tests:
-    name: E2E Tests
-    needs: code-quality
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1, 2]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'yarn'
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
-      - name: Install Playwright browsers
-        run: yarn playwright install --with-deps chromium
-
-      - name: Build the app
-        run: yarn build
-
-      - name: Run E2E tests
-        run: yarn playwright test tests/e2e --shard=${{ matrix.shard }}/2
-
-      - name: Upload E2E test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report-${{ matrix.shard }}
-          path: playwright-report/
-          retention-days: 7
-
-  publish:
-    name: Publish to NPM
-    needs: [unit-tests, e2e-tests]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: ${{ github.ref }}
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          registry-url: 'https://registry.npmjs.org'
-          scope: '@zwidekalanga'
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
-      - name: Build package
-        run: yarn build
-
-      - name: Setup Git Identity
+      - name: Notify about workflow change
         run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
-          git config --global --add safe.directory "${GITHUB_WORKSPACE}"
+          echo "This workflow is deprecated. Please use the new CI/CD pipeline in ci.yml instead."
+          echo "The new workflow includes:"
+          echo "- Improved caching and artifact sharing"
+          echo "- Parallel testing with sharding"
+          echo "- Automated semantic versioning with Changesets"
+          echo "- Documentation automation"
 
-      - name: Get current version from package.json
-        id: package_version
-        run: echo "current_version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
-
-      - name: Get latest published version
-        id: npm_version
+      - name: Trigger new workflow
         run: |
-          LATEST_VERSION=$(npm view @zwidekalanga/svelte-logviewer version 2>/dev/null || echo "0.0.0")
-          echo "latest_version=$LATEST_VERSION" >> $GITHUB_OUTPUT
-          echo "Latest published version: $LATEST_VERSION"
-
-      - name: Determine version bump type
-        id: versioning
-        run: |
-          if [[ $(git log -1 --pretty=%B) == *"[major]"* ]]; then
-            echo "VERSION_TYPE=major" >> $GITHUB_OUTPUT
-            echo "Determined version bump: MAJOR"
-          elif [[ $(git log -1 --pretty=%B) == *"[minor]"* ]]; then
-            echo "VERSION_TYPE=minor" >> $GITHUB_OUTPUT
-            echo "Determined version bump: MINOR"
-          else
-            echo "VERSION_TYPE=patch" >> $GITHUB_OUTPUT
-            echo "Determined version bump: PATCH"
-          fi
-
-      - name: Update package.json version to match latest published version
-        if: steps.npm_version.outputs.latest_version != '0.0.0'
-        run: |
-          npm version ${{ steps.npm_version.outputs.latest_version }} --no-git-tag-version --allow-same-version
-          echo "Updated local version to match npm: ${{ steps.npm_version.outputs.latest_version }}"
-
-      - name: Bump version
-        run: |
-          npm version ${{ steps.versioning.outputs.VERSION_TYPE || 'patch' }} --no-git-tag-version
-          NEW_VERSION=$(node -p "require('./package.json').version")
-          echo "New version after bump: $NEW_VERSION"
-          # Check if there are changes to commit
-          if git diff --exit-code package.json; then
-            echo "No changes to package.json, skipping commit"
-          else
-            git add package.json
-            git config --global --add safe.directory "${GITHUB_WORKSPACE}"
-            git commit -m "Bump version to $NEW_VERSION [skip ci]" || echo "No changes to commit or commit failed - continuing anyway"
-          fi
-
-      - name: Publish to npm
-        run: |
-          NEW_VERSION=$(node -p "require('./package.json').version")
-          echo "Publishing version: $NEW_VERSION"
-          yarn publish --access public --no-git-tag-version --new-version $NEW_VERSION
+          echo "Triggering the new CI/CD workflow..."
+          gh workflow run "CI/CD Pipeline" -R ${{ github.repository }}
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

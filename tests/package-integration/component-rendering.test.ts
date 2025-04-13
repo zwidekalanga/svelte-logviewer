@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/svelte';
+import { describe, it, expect } from 'vitest';
+
 import MockConsumer from './MockConsumer.svelte';
 
 // Skip rendering tests for now since they require a browser environment

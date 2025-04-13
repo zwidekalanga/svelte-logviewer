@@ -1,7 +1,9 @@
 import { describe, it, expect } from 'vitest';
+
+import { LogViewerLine } from '../../dist/components/log-viewer/index.js';
 import * as packageExports from '../../dist/index.js';
 import { LogViewer } from '../../dist/index.js';
-import { LogViewerLine } from '../../dist/components/log-viewer/index.js';
+
 import type { LogViewerProps, LogLine, LogContent, AnsiParseResult } from '../../dist/index.js';
 
 describe('Package exports', () => {

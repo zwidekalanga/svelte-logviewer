@@ -1,32 +1,29 @@
+import ConnectionClient from './connection-client.js';
+
+import type { ConnectionClientOptions } from './connection-client.js';
 import type { WebsocketOptions } from '../../../lib/types/log-viewer.js';
 
-export interface WebSocketClientOptions {
-	url: string;
+export interface WebSocketClientOptions extends ConnectionClientOptions {
 	websocketOptions?: WebsocketOptions;
-	onMessage: (message: string) => void;
-	onError?: (error: Error) => void;
 }
 
 /**
  * WebSocketClient handles the connection and communication with WebSocket endpoints
  */
-export class WebSocketClient {
-	private url: string;
-	private options: WebsocketOptions;
+export class WebSocketClient extends ConnectionClient {
 	private connection: WebSocket | null = null;
-	private onMessage: (message: string) => void;
-	private onError?: (error: Error) => void;
-	private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
 	/**
 	 * Create a new WebSocketClient
 	 * @param {WebSocketClientOptions} config - Configuration options
 	 */
 	constructor(config: WebSocketClientOptions) {
-		this.url = config.url;
-		this.options = config.websocketOptions || {};
-		this.onMessage = config.onMessage;
-		this.onError = config.onError;
+		super({
+			url: config.url,
+			options: config.websocketOptions || {},
+			onMessage: config.onMessage,
+			onError: config.onError
+		});
 	}
 
 	/**
@@ -44,19 +41,8 @@ export class WebSocketClient {
 			};
 
 			this.connection.onmessage = (event: MessageEvent) => {
-				let messageText: string = event.data;
-
-				// Use custom formatter if provided
-				if (typeof this.options.formatMessage === 'function') {
-					messageText = this.options.formatMessage(event.data);
-				} else if (typeof event.data === 'object') {
-					// Try to convert object to string if not handled by formatter
-					try {
-						messageText = JSON.stringify(event.data);
-					} catch (err) {
-						console.error('Failed to stringify message data:', err);
-					}
-				}
+				// Format the message using the base class method
+				const messageText = this.formatMessageData(event.data);
 
 				// Pass the message to the caller
 				this.onMessage(messageText);
@@ -85,15 +71,11 @@ export class WebSocketClient {
 					this.options.onError(e);
 				}
 
-				if (this.onError) {
-					this.onError(new Error('WebSocket connection error'));
-				}
+				this.handleConnectionError(new Error('WebSocket connection error'));
 			};
 		} catch (error) {
 			console.error('Error setting up WebSocket:', error);
-			if (this.onError) {
-				this.onError(error instanceof Error ? error : new Error(String(error)));
-			}
+			this.handleConnectionError(error instanceof Error ? error : new Error(String(error)));
 		}
 	}
 

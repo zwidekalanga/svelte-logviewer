@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+
 import { WebSocketClient } from '../websocket-client.js';
 
 interface WebSocketEvent {
@@ -10,7 +11,7 @@ interface WebSocketEvent {
 
 // Type for testing private members
 type TestWebSocketClient = WebSocketClient & {
-	_connection: MockWebSocket | null;
+	connection: MockWebSocket | null;
 };
 
 // Mock WebSocket

@@ -1,6 +1,7 @@
 <script lang="ts">
-	import type { LineContent } from '../../../lib/types/log-content.js';
 	import LinePart from './log-viewer-line-part.svelte';
+
+	import type { LineContent } from '$lib/types/log-content.js';
 	import type { Match } from './log-viewer-utils.js';
 
 	const {
