@@ -51,7 +51,7 @@ export class EventSourceClient extends ConnectionClient {
 			});
 
 			this.connection.onopen = (e: Event) => {
-				console.log('EventSource connection established');
+				console.log('EventSource connection established.');
 				if (typeof this.options.onOpen === 'function') {
 					this.options.onOpen(e, this.connection!);
 				}

@@ -99,63 +99,64 @@ jobs:
     uses: ./.github/workflows/e2e-tests.yml
     with:
       node-version: '20'
-#  docs:
-#    name: Build Documentation
-#    needs: [lint, unit_tests, e2e_tests]
-#    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/development')
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Checkout code
-#        uses: actions/checkout@v4
-#
-#      - name: Setup Node.js
-#        uses: actions/setup-node@v4
-#        with:
-#          node-version: '20'
-#          cache: 'yarn'
-#
-#      - name: Cache dependencies
-#        id: yarn-cache
-#        uses: actions/cache@v4
-#        with:
-#          path: |
-#            **/node_modules
-#            .yarn/cache
-#          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-#          restore-keys: |
-#            ${{ runner.os }}-yarn-
-#
-#      - name: Install dependencies
-#        if: steps.yarn-cache.outputs.cache-hit != 'true'
-#        run: yarn install --prefer-offline || yarn install
-#
-#      - name: Build Storybook
-#        run: yarn build-storybook
-#
-#      - name: Upload Storybook artifacts
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: storybook-static
-#          path: storybook-static/
-#          retention-days: 1
-#
-#  deploy-docs:
-#    name: Deploy Documentation
-#    needs: docs
-#    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Checkout code
-#        uses: actions/checkout@v4
-#
-#      - name: Download Storybook artifacts
-#        uses: actions/download-artifact@v4
-#        with:
-#          name: storybook-static
-#          path: storybook-static/
-#
-#      - name: Deploy to GitHub Pages
-#        uses: JamesIves/github-pages-deploy-action@v4
-#        with:
-#          folder: storybook-static
-#          branch: gh-pages
+
+  docs:
+    name: Build Documentation
+    needs: [lint, unit_tests, e2e_tests]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/development')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+
+      - name: Cache dependencies
+        id: yarn-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            **/node_modules
+            .yarn/cache
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Install dependencies
+        if: steps.yarn-cache.outputs.cache-hit != 'true'
+        run: yarn install --prefer-offline || yarn install
+
+      - name: Build Storybook
+        run: yarn build-storybook
+
+      - name: Upload Storybook artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: storybook-static
+          path: storybook-static/
+          retention-days: 1
+
+  deploy-docs:
+    name: Deploy Documentation
+    needs: docs
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download Storybook artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: storybook-static
+          path: storybook-static/
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: storybook-static
+          branch: gh-pages
