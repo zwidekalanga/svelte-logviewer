@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-	import type { SvelteComponent } from 'svelte';
 	import { VList } from 'virtua/svelte';
-	import SearchBar from './log-viewer-search-bar.svelte';
+
+	import EventSourceClient from './eventsource-client.js';
 	import Line from './log-viewer-line.svelte';
+	import SearchBar from './log-viewer-search-bar.svelte';
 	import {
 		DEFAULT_PROPS,
 		processText,
@@ -15,10 +16,11 @@
 		getPreviousMatchIndex,
 		type Match
 	} from './log-viewer-utils.js';
-	import type { LogViewerProps } from '../../../lib/types/log-viewer.js';
-	import type { LogLine } from '../../../lib/types/log-line.js';
 	import WebSocketClient from './websocket-client.js';
-	import EventSourceClient from './eventsource-client.js';
+
+	import type { LogLine } from '$lib/types/log-line.js';
+	import type { LogViewerProps } from '$lib/types/log-viewer.js';
+	import type { SvelteComponent } from 'svelte';
 
 	const props = $props();
 

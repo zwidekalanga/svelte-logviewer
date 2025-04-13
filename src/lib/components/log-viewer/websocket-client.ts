@@ -1,6 +1,7 @@
-import type { WebsocketOptions } from '../../../lib/types/log-viewer.js';
 import ConnectionClient from './connection-client.js';
+
 import type { ConnectionClientOptions } from './connection-client.js';
+import type { WebsocketOptions } from '../../../lib/types/log-viewer.js';
 
 export interface WebSocketClientOptions extends ConnectionClientOptions {
 	websocketOptions?: WebsocketOptions;

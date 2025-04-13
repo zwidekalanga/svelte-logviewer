@@ -5,6 +5,7 @@
  * See the LICENSE file in the root directory of this source tree.
  */
 import { SvelteComponentTyped } from 'svelte';
+
 import type { IconProps } from '../types.js';
 declare const __propDef: {
 	props: IconProps;

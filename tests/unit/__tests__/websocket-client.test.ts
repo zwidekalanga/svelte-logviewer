@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+
 import { WebSocketClient } from '../../../src/lib/components/log-viewer/websocket-client.js';
 
 // Constants that match WebSocket readyState values

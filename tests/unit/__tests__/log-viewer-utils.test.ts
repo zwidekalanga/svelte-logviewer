@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+
 import {
 	processText,
 	isHighlighted,
@@ -9,6 +10,7 @@ import {
 	getNextMatchIndex,
 	getPreviousMatchIndex
 } from '../log-viewer-utils.js';
+
 import type { LogLine } from '../../../../types/log-line.js';
 
 describe('processText', () => {

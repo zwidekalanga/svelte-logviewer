@@ -115,6 +115,26 @@ yarn test
 
 The package structure tests verify that the library can be properly imported by consumer projects.
 
+### Contributing
+
+We use [Changesets](https://github.com/changesets/changesets) for versioning and publishing. When making changes:
+
+1. Make your code changes
+2. Run `yarn changeset` to create a changeset file
+3. Select the type of version bump (patch, minor, major)
+4. Write a description of your changes
+5. Commit the changeset file along with your code changes
+
+Our CI/CD pipeline will:
+
+- Run linting and type checking
+- Build the package
+- Run unit tests and E2E tests in parallel
+- Build and deploy documentation (for pushes to main)
+- Publish to npm (for pushes to main with changesets)
+
+For more details, see the [Changesets documentation](.changeset/README.md) and the [CI/CD Pipeline documentation](CICD.md).
+
 ## Examples
 
 Check out the examples in the Storybook:
