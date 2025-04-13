@@ -34,6 +34,9 @@ jobs:
         uses: changesets/action@v1
         with:
           publish: yarn release
+          title: 'Version Packages'
+          commit: 'Version Packages'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Using the default GITHUB_TOKEN with appropriate permissions
+          GITHUB_TOKEN: ${{ github.token }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
