@@ -5,6 +5,11 @@ on:
     branches:
       - main
 
+# These permissions are needed to interact with GitHub's API
+permissions:
+  contents: write # to create release (changesets/action)
+  pull-requests: write # to create pull request (changesets/action)
+
 jobs:
   release:
     name: Release
