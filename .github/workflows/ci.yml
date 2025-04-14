@@ -8,13 +8,13 @@ on:
   workflow_dispatch:
 
 jobs:
-  setup:
-    name: Setup
+  preparation:
+    name: Environment Preparation
     uses: ./.github/workflows/setup.yml
 
   lint:
-    name: Lint and Type Check
-    needs: setup
+    name: Code Quality
+    needs: preparation
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -49,7 +49,7 @@ jobs:
 
   build:
     name: Build
-    needs: setup
+    needs: preparation
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -88,56 +88,69 @@ jobs:
 
   unit_tests:
     name: Unit Tests
-    needs: [setup, build]
+    needs: [preparation, build]
     uses: ./.github/workflows/vitest.yml
     with:
       node-version: '20.18'
 
   e2e_tests:
     name: E2E Tests
-    needs: [setup, build]
+    needs: [preparation, build]
     uses: ./.github/workflows/e2e-tests.yml
     with:
       node-version: '20.18'
-      
-  codeclimate:
-    name: CodeClimate Analysis
-    needs: [unit_tests]
-    if: github.event_name == 'pull_request'
+
+  code_coverage:
+    name: Code Coverage
+    needs: [unit_tests, e2e_tests]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20.18'
           cache: 'yarn'
-          
+
       - name: Install dependencies
         run: yarn install --prefer-offline || yarn install
-        
-      - name: Download test coverage
+
+      - name: Download unit test coverage
         uses: actions/download-artifact@v4
         with:
-          name: unit-test-results-0
+          pattern: unit-test-results-*
           path: coverage/
-          
-      - name: Setup CodeClimate test-reporter
-        run: |
-          curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-          chmod +x ./cc-test-reporter
-          
-      - name: Report coverage to CodeClimate
-        env:
-          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
-          GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
-          GIT_COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-        run: |
-          ./cc-test-reporter format-coverage -t lcov -o coverage/codeclimate.json coverage/lcov.info
-          ./cc-test-reporter upload-coverage -i coverage/codeclimate.json
+          merge-multiple: true
 
-# The docs and deploy-docs jobs have been moved to changesets.yml
+      - name: Download E2E test coverage
+        uses: actions/download-artifact@v4
+        with:
+          pattern: playwright-report-*
+          path: coverage/
+          merge-multiple: true
+        continue-on-error: true
+
+      - name: Check directory structure
+        run: |
+          echo "Unit test coverage structure:"
+          find coverage -type f -name "coverage-final.json" | sort
+
+          echo "E2E test coverage structure:"
+          find coverage -type f -name "coverage-final.json" -path "*/e2e-coverage/*" | sort
+
+      - name: Merge coverage reports
+        run: |
+          # Install required packages if not already present
+          yarn add -D istanbul-lib-coverage istanbul-lib-report istanbul-reports
+
+          # Run the merge script
+          node merge-coverage.js
+
+      - name: Upload coverage to qlty.sh
+        uses: qltysh/qlty-action/coverage@main
+        with:
+          coverage-token: ${{ secrets.QLTY_TOKEN }}
+          files: coverage/lcov.info
+          tag: combined-coverage
