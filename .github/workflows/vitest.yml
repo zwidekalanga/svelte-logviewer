@@ -49,7 +49,7 @@ jobs:
           path: dist/
 
       - name: Run Vitest
-        run: yarn test:unit:shard $((${{ matrix.ci_node_index }}+1))/${{ matrix.ci_node_total }} --run
+        run: yarn test:unit:shard $((${{ matrix.ci_node_index }}+1))/${{ matrix.ci_node_total }} --run --coverage
         env:
           CI_NODE_INDEX: ${{ matrix.ci_node_index }}
           CI_NODE_TOTAL: ${{ matrix.ci_node_total }}
