@@ -10,6 +10,14 @@ node_modules
 /build
 /dist
 
+# Test reports and coverage
+/coverage
+/coverage-*
+/playwright-report
+/coverage-reports
+/monocart-report
+/**/*.tsbuildinfo
+/**/.nyc_output
 
 # OS
 .DS_Store
