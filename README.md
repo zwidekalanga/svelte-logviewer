@@ -1,5 +1,8 @@
 # Svelte LogViewer
 
+[![Maintainability](https://qlty.sh/badges/859d2796-5577-4a7b-8081-173cda7eed87/maintainability.svg)](https://qlty.sh/gh/zwidekalanga/projects/svelte-logviewer)
+[![Code Coverage](https://qlty.sh/badges/859d2796-5577-4a7b-8081-173cda7eed87/test_coverage.svg)](https://qlty.sh/gh/zwidekalanga/projects/svelte-logviewer)
+
 A Svelte component for displaying and streaming log files with syntax highlighting, search functionality, and more.
 
 ## Features
@@ -114,6 +117,29 @@ yarn test
 ```
 
 The package structure tests verify that the library can be properly imported by consumer projects.
+
+### Code Coverage
+
+This project uses a comprehensive code coverage setup that combines coverage from both unit tests and E2E tests:
+
+- **Unit tests**: Coverage is collected using Vitest with the V8 coverage provider
+- **E2E tests**: Coverage is collected using Playwright with the Monocart coverage reporter
+- **Combined coverage**: A custom merge script (`merge-coverage.js`) combines coverage data from both sources
+
+To run tests with coverage:
+
+```bash
+# Run unit tests with coverage
+yarn test:unit:coverage
+
+# Run E2E tests with coverage
+yarn test:e2e:coverage
+
+# Merge coverage reports (after running both test suites with coverage)
+node merge-coverage.js
+```
+
+The merged coverage report can be found at `coverage/combined/index.html`.
 
 ### Contributing
 

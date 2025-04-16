@@ -8,13 +8,13 @@ on:
   workflow_dispatch:
 
 jobs:
-  setup:
-    name: Setup
+  preparation:
+    name: Environment Preparation
     uses: ./.github/workflows/setup.yml
 
   lint:
-    name: Lint and Type Check
-    needs: setup
+    name: Code Quality
+    needs: preparation
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -49,7 +49,7 @@ jobs:
 
   build:
     name: Build
-    needs: setup
+    needs: preparation
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -88,22 +88,21 @@ jobs:
 
   unit_tests:
     name: Unit Tests
-    needs: [setup, build]
+    needs: [preparation, build]
     uses: ./.github/workflows/vitest.yml
     with:
       node-version: '20.18'
 
   e2e_tests:
     name: E2E Tests
-    needs: [setup, build]
+    needs: [preparation, build]
     uses: ./.github/workflows/e2e-tests.yml
     with:
       node-version: '20.18'
 
-  docs:
-    name: Build Documentation
-    needs: [lint, unit_tests, e2e_tests]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/development')
+  code_coverage:
+    name: Code Coverage
+    needs: [unit_tests, e2e_tests]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -115,48 +114,43 @@ jobs:
           node-version: '20.18'
           cache: 'yarn'
 
-      - name: Cache dependencies
-        id: yarn-cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            **/node_modules
-            .yarn/cache
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
-
       - name: Install dependencies
-        if: steps.yarn-cache.outputs.cache-hit != 'true'
         run: yarn install --prefer-offline || yarn install
 
-      - name: Build Storybook
-        run: yarn build-storybook
-
-      - name: Upload Storybook artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: storybook-static
-          path: storybook-static/
-          retention-days: 1
-
-  deploy-docs:
-    name: Deploy Documentation
-    needs: docs
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Download Storybook artifacts
+      - name: Download unit test coverage
         uses: actions/download-artifact@v4
         with:
-          name: storybook-static
-          path: storybook-static/
+          pattern: unit-test-results-*
+          path: coverage/
+          merge-multiple: true
 
-      - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
+      - name: Download E2E test coverage
+        uses: actions/download-artifact@v4
         with:
-          folder: storybook-static
-          branch: gh-pages
+          pattern: playwright-report-*
+          path: coverage/
+          merge-multiple: true
+        continue-on-error: true
+
+      - name: Check directory structure
+        run: |
+          echo "Unit test coverage structure:"
+          find coverage -type f -name "coverage-final.json" | sort
+
+          echo "E2E test coverage structure:"
+          find coverage -type f -name "coverage-final.json" -path "*/e2e-coverage/*" | sort
+
+      - name: Merge coverage reports
+        run: |
+          # Install required packages if not already present
+          yarn add -D istanbul-lib-coverage istanbul-lib-report istanbul-reports
+
+          # Run the merge script
+          node merge-coverage.js
+
+      - name: Upload coverage to qlty.sh
+        uses: qltysh/qlty-action/coverage@main
+        with:
+          coverage-token: ${{ secrets.QLTY_TOKEN }}
+          files: coverage/lcov.info
+          tag: combined-coverage

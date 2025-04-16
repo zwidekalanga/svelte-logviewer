@@ -9,6 +9,27 @@ export default defineConfig({
 		environment: 'jsdom',
 		testTimeout: 10000,
 		silent: false,
-		reporters: ['default']
+		reporters: ['default'],
+		coverage: {
+			provider: 'v8',
+			reporter: ['text', 'json', 'lcov', 'html'],
+			reportsDirectory: './coverage',
+			include: ['src/**/*'],
+			exclude: [
+				'**/*.config.{js,ts}',
+				'**/node_modules/**',
+				'**/dist/**',
+				'**/.svelte-kit/**',
+				'**/*.test.*',
+				'**/*.spec.*',
+				'**/__tests__/**',
+				'**/.storybook/**',
+				'**/stories/**',
+				'**/tests/**'
+			]
+		},
+		typecheck: {
+			tsconfig: './tsconfig.test.json'
+		}
 	}
 });

@@ -58,7 +58,14 @@ export default [
 			'*.json',
 			'*.config.js',
 			'jsdom-with-global.js',
-			'*.config.ts'
+			'*.config.ts',
+			'coverage/',
+			'coverage-*/',
+			'playwright-report/',
+			'coverage-reports/',
+			'**/playwright-coverage/',
+			'**/e2e-coverage/',
+			'**/.nyc_output/'
 		]
 	}
 ];

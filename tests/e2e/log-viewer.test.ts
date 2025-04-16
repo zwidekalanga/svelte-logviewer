@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './coverage-setup';
 
 test('Basic page navigation works', async ({ page }) => {
 	// Go to the home page
