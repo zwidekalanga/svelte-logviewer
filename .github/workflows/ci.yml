@@ -140,13 +140,45 @@ jobs:
           echo "E2E test coverage structure:"
           find coverage -type f -name "coverage-final.json" -path "*/e2e-coverage/*" | sort
 
-      - name: Merge coverage reports
+          echo "Monocart coverage structure:"
+          find coverage -type f -name "coverage-report.json" | sort
+          find coverage -type f -name "lcov.info" | sort
+
+      - name: Install NYC dependencies
         run: |
-          # Install required packages if not already present
+          yarn add -D @istanbuljs/nyc-config-typescript
           yarn add -D istanbul-lib-coverage istanbul-lib-report istanbul-reports
 
-          # Run the merge script
-          node merge-coverage.js
+      # Ensure unit test coverage is always available
+      - name: Generate fallback unit coverage if needed
+        run: |
+          if [ ! -f "coverage/coverage-final.json" ]; then
+            echo "Warning: Unit test coverage not found, running unit tests with coverage"
+            yarn test:unit --coverage
+          fi
+
+      # Now process E2E coverage
+      - name: Process E2E coverage
+        run: node convert-coverage.js
+
+      - name: Merge coverage reports
+        run: node merge-coverage.js
+
+      # Verify lcov content before upload
+      - name: Verify coverage data
+        run: |
+          echo "LCOV content summary:"
+          grep -c "SF:" coverage/lcov.info || echo "No SF entries found"
+
+          # Check if it only contains the placeholder file
+          if [ $(grep -c "SF:" coverage/lcov.info) -eq 1 ] && grep -q "placeholder.js" coverage/lcov.info; then
+            echo "WARNING: Coverage only contains the placeholder file!"
+            
+            # Rerun unit tests with coverage if needed
+            echo "Re-running unit tests with coverage to ensure proper reporting"
+            yarn test:unit --coverage
+            node merge-coverage.js
+          fi
 
       - name: Upload coverage to qlty.sh
         uses: qltysh/qlty-action/coverage@main
