@@ -1,0 +1,25 @@
+{
+	"extends": "@istanbuljs/nyc-config-typescript",
+	"all": true,
+	"extension": [".js", ".ts", ".svelte"],
+	"include": ["src/**/*.{js,ts,svelte}"],
+	"exclude": [
+		"**/*.d.ts",
+		"**/*.spec.{js,ts}",
+		"**/*.test.{js,ts}",
+		"**/node_modules/**",
+		"dist",
+		"build",
+		"coverage"
+	],
+	"reporter": ["text", "lcov", "html", "json"],
+	"report-dir": "./coverage/nyc",
+	"temp-dir": "./coverage/.nyc_output",
+	"sourceMap": true,
+	"instrument": true,
+	"checkCoverage": true,
+	"branches": 60,
+	"lines": 70,
+	"functions": 70,
+	"statements": 70
+}

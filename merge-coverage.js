@@ -10,6 +10,8 @@ const COVERAGE_DIR = './coverage';
 const UNIT_COVERAGE_JSON = path.join(COVERAGE_DIR, 'coverage-final.json');
 const E2E_COVERAGE_DIR = path.join(COVERAGE_DIR, 'e2e-coverage');
 const E2E_COVERAGE_JSON = path.join(E2E_COVERAGE_DIR, 'coverage-final.json'); // Monocart outputs coverage-final.json with istanbul format
+const NYC_COVERAGE_DIR = path.join(COVERAGE_DIR, 'nyc');
+const NYC_COVERAGE_JSON = path.join(NYC_COVERAGE_DIR, 'coverage-final.json');
 const OUTPUT_DIR = path.join(COVERAGE_DIR, 'combined');
 
 // Create a coverage map
@@ -34,11 +36,46 @@ function loadCoverage(file, type) {
 	}
 }
 
-// Load unit test coverage
+// Load coverage from common sources
 loadCoverage(UNIT_COVERAGE_JSON, 'unit');
-
-// Load E2E test coverage
 loadCoverage(E2E_COVERAGE_JSON, 'e2e');
+loadCoverage(NYC_COVERAGE_JSON, 'nyc');
+
+// Try to find any other coverage-final.json files in the coverage directory
+const findCoverageFiles = (dir) => {
+	try {
+		if (!fs.existsSync(dir)) return [];
+
+		const items = fs.readdirSync(dir, { withFileTypes: true });
+		let files = [];
+
+		for (const item of items) {
+			const fullPath = path.join(dir, item.name);
+
+			if (item.isDirectory() && !['combined', '.nyc_output'].includes(item.name)) {
+				files = files.concat(findCoverageFiles(fullPath));
+			} else if (item.isFile() && item.name === 'coverage-final.json') {
+				files.push(fullPath);
+			}
+		}
+
+		return files;
+	} catch (error) {
+		console.error(`Error scanning directory ${dir}:`, error.message);
+		return [];
+	}
+};
+
+// Find and load all coverage-final.json files
+const additionalCoverageFiles = findCoverageFiles(COVERAGE_DIR).filter(
+	(file) => file !== UNIT_COVERAGE_JSON && file !== E2E_COVERAGE_JSON && file !== NYC_COVERAGE_JSON
+);
+
+// Load any additional coverage files found
+for (const file of additionalCoverageFiles) {
+	const relativePath = path.relative(COVERAGE_DIR, file);
+	loadCoverage(file, `additional (${relativePath})`);
+}
 
 // If we have coverage data, generate reports
 if (Object.keys(coverageMap.data).length > 0) {
