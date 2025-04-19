@@ -11,6 +11,11 @@ on:
         description: 'Whether the cache was hit'
         value: ${{ jobs.setup.outputs.cache-hit }}
 
+# Restrict permissions to minimum required
+permissions:
+  contents: read
+  actions: read
+
 jobs:
   setup:
     name: Setup Environment

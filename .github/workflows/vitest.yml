@@ -8,6 +8,12 @@ on:
         default: '20'
         type: string
 
+# Restrict permissions to minimum required
+permissions:
+  contents: read
+  actions: read
+  checks: read
+
 jobs:
   unit-test:
     name: Vitest
