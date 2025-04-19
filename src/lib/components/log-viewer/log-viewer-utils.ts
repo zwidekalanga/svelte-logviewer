@@ -196,43 +196,80 @@ export function findMatches(
 
 	const matches: Match[] = [];
 
+	// Process each line
 	for (let i = 0; i < lines.length; i++) {
 		const line = lines[i];
 
-		// Check each part of the line
+		// Check if line has content parts to search through
 		if (Array.isArray(line.content)) {
-			for (let partIndex = 0; partIndex < line.content.length; partIndex++) {
-				const part = line.content[partIndex];
-				if (!part.text) continue;
-
-				const contentText = part.text;
-
-				// Get comparison values based on case sensitivity
-				const compareText = caseInsensitive ? contentText.toLowerCase() : contentText;
-				const compareSearch = caseInsensitive ? searchText.toLowerCase() : searchText;
-
-				// Find all instances of the search text in this part
-				let startIdx = 0;
-				while (true) {
-					const foundIdx = compareText.indexOf(compareSearch, startIdx);
-					if (foundIdx === -1) break;
-
-					// Add this match
-					matches.push({
-						lineNumber: line.number,
-						partIndex: partIndex,
-						startIndex: foundIdx,
-						endIndex: foundIdx + compareSearch.length
-					});
-
-					// Move to check for next instance
-					startIdx = foundIdx + 1;
-				}
-			}
+			const lineMatches = findMatchesInLine(line, searchText, caseInsensitive);
+			matches.push(...lineMatches);
 		}
 	}
 
 	return matches;
+}
+
+/**
+ * Find matches for a search term in a specific log line
+ */
+function findMatchesInLine(line: LogLine, searchText: string, caseInsensitive: boolean): Match[] {
+	const lineMatches: Match[] = [];
+
+	// Check each part of the line for matches
+	for (let partIndex = 0; partIndex < line.content.length; partIndex++) {
+		const part = line.content[partIndex];
+		if (!part.text) continue;
+
+		const partMatches = findMatchesInPart(
+			line.number,
+			partIndex,
+			part.text,
+			searchText,
+			caseInsensitive
+		);
+		lineMatches.push(...partMatches);
+	}
+
+	return lineMatches;
+}
+
+/**
+ * Find all matches for a search term in a specific text part
+ */
+function findMatchesInPart(
+	lineNumber: number,
+	partIndex: number,
+	text: string,
+	searchText: string,
+	caseInsensitive: boolean
+): Match[] {
+	const partMatches: Match[] = [];
+
+	// Get comparison values based on case sensitivity
+	const compareText = caseInsensitive ? text.toLowerCase() : text;
+	const compareSearch = caseInsensitive ? searchText.toLowerCase() : searchText;
+
+	// Find all instances of the search text in this part
+	let startIdx = 0;
+
+	while (true) {
+		const foundIdx = compareText.indexOf(compareSearch, startIdx);
+		if (foundIdx === -1) break;
+
+		// Add this match
+		partMatches.push({
+			lineNumber: lineNumber,
+			partIndex: partIndex,
+			startIndex: foundIdx,
+			endIndex: foundIdx + compareSearch.length
+		});
+
+		// Move to check for next instance
+		startIdx = foundIdx + 1;
+	}
+
+	return partMatches;
 }
 
 /**
