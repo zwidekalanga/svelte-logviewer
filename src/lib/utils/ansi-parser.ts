@@ -16,6 +16,10 @@ const BRIGHT_COLORS = [
 	'brightwhite'
 ];
 
+// Generate color mappings
+const COLORS = createColorMap(30, 90); // Foreground colors
+const BG_COLORS = createColorMap(40, 100); // Background colors
+
 /**
  * Creates a color mapping with the specified starting code for standard and bright colors
  */
@@ -34,10 +38,6 @@ function createColorMap(standardStart: number, brightStart: number): Record<stri
 
 	return map;
 }
-
-// Generate color mappings
-const COLORS = createColorMap(30, 90); // Foreground colors
-const BG_COLORS = createColorMap(40, 100); // Background colors
 
 interface AnsiPart {
 	text: string;
