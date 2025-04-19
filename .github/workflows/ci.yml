@@ -7,6 +7,14 @@ on:
     branches: [main, development]
   workflow_dispatch:
 
+# Restrict permissions to minimum required
+permissions:
+  contents: read
+  actions: read
+  checks: write
+  pull-requests: write
+  statuses: write
+
 jobs:
   preparation:
     name: Environment Preparation
@@ -173,7 +181,7 @@ jobs:
           # Check if it only contains the placeholder file
           if [ $(grep -c "SF:" coverage/lcov.info) -eq 1 ] && grep -q "placeholder.js" coverage/lcov.info; then
             echo "WARNING: Coverage only contains the placeholder file!"
-            
+
             # Rerun unit tests with coverage if needed
             echo "Re-running unit tests with coverage to ensure proper reporting"
             yarn test:unit --coverage
