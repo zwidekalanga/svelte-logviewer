@@ -118,6 +118,9 @@ function splitAtVisiblePosition(text: string, maxVisibleLength: number): [string
 	return [firstPart, activeAnsiCodes + secondPart];
 }
 
+/**
+ * Process text into LogLine objects
+ */
 export function processText(
 	text: string,
 	wrapLines = false,
@@ -126,13 +129,31 @@ export function processText(
 ): LogLine[] {
 	// Standard processing without wrapping
 	if (!wrapLines) {
-		return text.split('\n').map((line, index) => ({
-			number: startLineNumber + index,
-			content: parseAnsi(line)
-		}));
+		return processTextWithoutWrapping(text, startLineNumber);
 	}
 
 	// Process with line wrapping
+	return processTextWithWrapping(text, maxLineLength, startLineNumber);
+}
+
+/**
+ * Process text without line wrapping
+ */
+function processTextWithoutWrapping(text: string, startLineNumber: number): LogLine[] {
+	return text.split('\n').map((line, index) => ({
+		number: startLineNumber + index,
+		content: parseAnsi(line)
+	}));
+}
+
+/**
+ * Process text with line wrapping
+ */
+function processTextWithWrapping(
+	text: string,
+	maxLineLength: number,
+	startLineNumber: number
+): LogLine[] {
 	const lines: LogLine[] = [];
 	let lineNumber = startLineNumber;
 
@@ -146,28 +167,53 @@ export function processText(
 			return;
 		}
 
-		let remainingText = line;
-		let isFirstChunk = true;
-
-		while (remainingText.length > 0) {
-			const availableLength = isFirstChunk ? maxLineLength : maxLineLength - 2; // Account for prefix
-			const [chunk, remaining] = splitAtVisiblePosition(remainingText, availableLength);
-			const prefix = isFirstChunk ? '' : '↪ ';
-
-			lines.push({
-				number: lineNumber++,
-				content: parseAnsi(prefix + chunk)
-			});
-
-			remainingText = remaining;
-			isFirstChunk = false;
-
-			// Break if we can't make any more progress
-			if (chunk.length === 0) break;
-		}
+		// Handle line wrapping for long lines
+		lineNumber = processWrappedLine(line, maxLineLength, lineNumber, lines);
 	});
 
 	return lines;
+}
+
+/**
+ * Process a single line that needs to be wrapped
+ * Returns the updated line number after processing
+ */
+function processWrappedLine(
+	line: string,
+	maxLineLength: number,
+	lineNumber: number,
+	lines: LogLine[]
+): number {
+	let remainingText = line;
+	let isFirstChunk = true;
+	let currentLineNumber = lineNumber;
+
+	while (remainingText.length > 0) {
+		// Adjust available length based on whether this is the first chunk
+		const availableLength = isFirstChunk ? maxLineLength : maxLineLength - 2; // Account for prefix
+
+		// Split the text at the appropriate position
+		const [chunk, remaining] = splitAtVisiblePosition(remainingText, availableLength);
+
+		// Add prefix for continuation lines
+		const prefix = isFirstChunk ? '' : '↪ ';
+
+		// Add the chunk as a new line
+		lines.push({
+			number: currentLineNumber++,
+			content: parseAnsi(prefix + chunk)
+		});
+
+		// Update for next iteration
+		remainingText = remaining;
+		isFirstChunk = false;
+
+		// Break if we can't make any more progress
+		if (chunk.length === 0) break;
+	}
+
+	// Return the updated line number
+	return currentLineNumber;
 }
 
 export function isHighlighted(lineNumber: number, highlight: number | number[]): boolean {
@@ -196,43 +242,80 @@ export function findMatches(
 
 	const matches: Match[] = [];
 
+	// Process each line
 	for (let i = 0; i < lines.length; i++) {
 		const line = lines[i];
 
-		// Check each part of the line
+		// Check if line has content parts to search through
 		if (Array.isArray(line.content)) {
-			for (let partIndex = 0; partIndex < line.content.length; partIndex++) {
-				const part = line.content[partIndex];
-				if (!part.text) continue;
-
-				const contentText = part.text;
-
-				// Get comparison values based on case sensitivity
-				const compareText = caseInsensitive ? contentText.toLowerCase() : contentText;
-				const compareSearch = caseInsensitive ? searchText.toLowerCase() : searchText;
-
-				// Find all instances of the search text in this part
-				let startIdx = 0;
-				while (true) {
-					const foundIdx = compareText.indexOf(compareSearch, startIdx);
-					if (foundIdx === -1) break;
-
-					// Add this match
-					matches.push({
-						lineNumber: line.number,
-						partIndex: partIndex,
-						startIndex: foundIdx,
-						endIndex: foundIdx + compareSearch.length
-					});
-
-					// Move to check for next instance
-					startIdx = foundIdx + 1;
-				}
-			}
+			const lineMatches = findMatchesInLine(line, searchText, caseInsensitive);
+			matches.push(...lineMatches);
 		}
 	}
 
 	return matches;
+}
+
+/**
+ * Find matches for a search term in a specific log line
+ */
+function findMatchesInLine(line: LogLine, searchText: string, caseInsensitive: boolean): Match[] {
+	const lineMatches: Match[] = [];
+
+	// Check each part of the line for matches
+	for (let partIndex = 0; partIndex < line.content.length; partIndex++) {
+		const part = line.content[partIndex];
+		if (!part.text) continue;
+
+		const partMatches = findMatchesInPart(
+			line.number,
+			partIndex,
+			part.text,
+			searchText,
+			caseInsensitive
+		);
+		lineMatches.push(...partMatches);
+	}
+
+	return lineMatches;
+}
+
+/**
+ * Find all matches for a search term in a specific text part
+ */
+function findMatchesInPart(
+	lineNumber: number,
+	partIndex: number,
+	text: string,
+	searchText: string,
+	caseInsensitive: boolean
+): Match[] {
+	const partMatches: Match[] = [];
+
+	// Get comparison values based on case sensitivity
+	const compareText = caseInsensitive ? text.toLowerCase() : text;
+	const compareSearch = caseInsensitive ? searchText.toLowerCase() : searchText;
+
+	// Find all instances of the search text in this part
+	let startIdx = 0;
+
+	while (true) {
+		const foundIdx = compareText.indexOf(compareSearch, startIdx);
+		if (foundIdx === -1) break;
+
+		// Add this match
+		partMatches.push({
+			lineNumber: lineNumber,
+			partIndex: partIndex,
+			startIndex: foundIdx,
+			endIndex: foundIdx + compareSearch.length
+		});
+
+		// Move to check for next instance
+		startIdx = foundIdx + 1;
+	}
+
+	return partMatches;
 }
 
 /**

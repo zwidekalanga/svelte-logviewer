@@ -13,8 +13,6 @@
 		component: LogViewer,
 		tags: ['autodocs']
 	});
-
-	type MessageData = Record<string, unknown>;
 </script>
 
 <!-- Basic example with text -->
@@ -45,16 +43,50 @@
 	}}
 />
 
-<!-- Example with WebSocket -->
+<!-- Example with WebSocket - Using Binance WebSocket API for real-time cryptocurrency trade data -->
 <Story
 	name="WebSocket"
 	args={{
 		websocket: true,
-		url: 'wss://echo.websocket.org',
-		onMessage: (data: MessageData) => {
-			const { bid, ask, lastPrice } = data;
-			return `BTC/USD: ${bid}/${ask} Last: ${lastPrice}`;
+		url: 'wss://stream.binance.com:9443/ws/btcusdt@trade', // Binance WebSocket API - real-time BTC/USDT trade data
+		websocketOptions: {
+			// No need for onOpen handler as the service automatically sends data
+			// Format the messages to look nice in the log viewer
+			formatMessage: (message: unknown) => {
+				try {
+					if (typeof message === 'string') {
+						// Try to parse as JSON
+						const data = JSON.parse(message);
+
+						// Format Binance trade data
+						if (data.e === 'trade') {
+							const symbol = data.s; // Trading pair symbol (e.g., BTCUSDT)
+							const price = Number(data.p).toLocaleString('en-US', {
+								minimumFractionDigits: 2,
+								maximumFractionDigits: 2
+							});
+							const quantity = Number(data.q).toLocaleString('en-US', {
+								minimumFractionDigits: 8,
+								maximumFractionDigits: 8
+							});
+							const timestamp = new Date(data.T).toLocaleTimeString(); // Trade time
+							const isBuyerMaker = data.m ? 'SELL' : 'BUY'; // Market side
+							const color = isBuyerMaker === 'SELL' ? '\x1b[31m' : '\x1b[32m'; // Red for sell, green for buy
+
+							return `[${timestamp}] [TRADE] ${symbol} | ${color}${isBuyerMaker}\x1b[0m | Price: $${price} | Quantity: ${quantity}`;
+						}
+
+						return JSON.stringify(data, null, 2);
+					}
+					return String(message);
+					// eslint-disable-next-line @typescript-eslint/no-unused-vars
+				} catch (_) {
+					return String(message);
+				}
+			},
+			reconnect: true
 		},
+		follow: true, // Auto-scroll to follow new log entries
 		height: '600px'
 	}}
 />
