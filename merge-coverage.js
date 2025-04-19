@@ -16,6 +16,49 @@ const OUTPUT_DIR = path.join(COVERAGE_DIR, 'combined');
 const coverageMap = libCoverage.createCoverageMap({});
 
 /**
+ * Normalize file paths by removing workspace prefix from absolute paths
+ * @param {object} coverage - Coverage data object
+ * @returns {object} - Normalized coverage data
+ */
+function normalizePaths(coverage) {
+	const normalizedCoverage = {};
+	// Common workspace paths to check for and remove
+	const workspacePaths = [
+		'/home/runner/work/svelte-logviewer/svelte-logviewer/',
+		process.cwd() + '/'
+	];
+
+	Object.keys(coverage).forEach((key) => {
+		let normalizedKey = key;
+
+		// Try to normalize the key by removing workspace prefix
+		for (const workspacePath of workspacePaths) {
+			if (key.startsWith(workspacePath)) {
+				normalizedKey = key.substring(workspacePath.length);
+				break;
+			}
+		}
+
+		// Copy the coverage data
+		normalizedCoverage[normalizedKey] = { ...coverage[key] };
+
+		// Also normalize the path property if it exists
+		if (normalizedCoverage[normalizedKey].path) {
+			for (const workspacePath of workspacePaths) {
+				if (normalizedCoverage[normalizedKey].path.startsWith(workspacePath)) {
+					normalizedCoverage[normalizedKey].path = normalizedCoverage[normalizedKey].path.substring(
+						workspacePath.length
+					);
+					break;
+				}
+			}
+		}
+	});
+
+	return normalizedCoverage;
+}
+
+/**
  * Load coverage data from a file
  * @param {string} file - Path to the coverage file
  * @param {string} type - Type of coverage (unit or e2e)
@@ -25,7 +68,14 @@ function loadCoverage(file, type) {
 		if (fs.existsSync(file)) {
 			console.log(`Loading ${type} coverage from ${file}`);
 			const coverage = JSON.parse(fs.readFileSync(file, 'utf8'));
-			coverageMap.merge(coverage);
+
+			// Normalize paths in the coverage data before merging
+			const normalizedCoverage = normalizePaths(coverage);
+			console.log(
+				`Normalized ${Object.keys(normalizedCoverage).length} file paths from ${type} coverage`
+			);
+
+			coverageMap.merge(normalizedCoverage);
 		} else {
 			console.warn(`Warning: ${type} coverage file not found at ${file}`);
 		}
