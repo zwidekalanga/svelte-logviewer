@@ -1,6 +1,9 @@
 test-results
 node_modules
 
+#IDE
+.idea
+
 # Output
 .output
 .vercel
