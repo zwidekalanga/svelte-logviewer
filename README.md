@@ -1,7 +1,7 @@
 # Svelte LogViewer
 
-[![Maintainability](https://qlty.sh/badges/859d2796-5577-4a7b-8081-173cda7eed87/maintainability.svg)](https://qlty.sh/gh/zwidekalanga/projects/svelte-logviewer)
-[![Code Coverage](https://qlty.sh/badges/859d2796-5577-4a7b-8081-173cda7eed87/test_coverage.svg)](https://qlty.sh/gh/zwidekalanga/projects/svelte-logviewer)
+[![Maintainability](https://qlty.sh/badges/4b8be42b-0d13-4763-9514-2a795940ea89/maintainability.svg)](https://qlty.sh/gh/zwidekalanga/projects/svelte-logviewer)
+[![Code Coverage](https://qlty.sh/badges/4b8be42b-0d13-4763-9514-2a795940ea89/test_coverage.svg)](https://qlty.sh/gh/zwidekalanga/projects/svelte-logviewer)
 
 A Svelte component for displaying and streaming log files with syntax highlighting, search functionality, and more.
 
