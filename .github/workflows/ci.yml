@@ -15,7 +15,6 @@ permissions:
   checks: write
   pull-requests: write
   statuses: write
-  id-token: write # Required for requesting the JWT
 
 jobs:
   preparation:
@@ -196,6 +195,3 @@ jobs:
           coverage-token: ${{ secrets.QLTY_TOKEN }}
           files: coverage/lcov.info
           tag: ${{ (github.ref == 'refs/heads/main') && 'main-coverage' || 'dev-coverage' }}
-
-  # The release process has been moved to a separate workflow file
-  # See .github/workflows/release.yml
