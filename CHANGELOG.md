@@ -1,5 +1,11 @@
 # @zwidekalanga/svelte-logviewer
 
+## 0.2.0
+
+### Minor Changes
+
+- db765c4: Update npm version
+
 ## 0.1.0
 
 ### Minor Changes
