@@ -1,3 +1,4 @@
+---
 name: Changesets
 
 on:
@@ -7,8 +8,8 @@ on:
 
 # These permissions are needed to interact with GitHub's API
 permissions:
-  contents: write # to create release (changesets/action)
-  pull-requests: write # to create pull request (changesets/action)
+  contents: write
+  pull-requests: write
 
 jobs:
   release:
@@ -37,8 +38,8 @@ jobs:
           title: 'Version Packages'
           commit: 'Version Packages'
         env:
-          # Using the default GITHUB_TOKEN with appropriate permissions
-          GITHUB_TOKEN: ${{ github.token }}
+          # Using a Personal Access Token with appropriate permissions instead of the default token
+          GITHUB_TOKEN: ${{ secrets.PAT_GITHUB }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Build Storybook

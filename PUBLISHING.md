@@ -1,6 +1,7 @@
 # Publishing to NPM
 
-This project is set up to automatically publish to NPM when changes are pushed to the main branch. Here's how it works and how to configure it:
+This project is set up to automatically publish to NPM when changes are pushed to the main branch.
+Here's how it works and how to configure it:
 
 ## Project Structure
 
@@ -67,7 +68,8 @@ To allow GitHub Actions to publish to NPM, you need to set up an NPM token:
 
 1. Generate an NPM access token:
 
-   - Go to your NPM account settings (https://www.npmjs.com/settings/YOUR_USERNAME/tokens)
+   - Go to your NPM account settings
+     (https://www.npmjs.com/settings/YOUR_USERNAME/tokens)
    - Click "Generate New Token" (select "Automation" type)
    - Copy the generated token
 
@@ -109,7 +111,8 @@ If you see an error like:
 error Couldn't publish package: "You cannot publish over the previously published versions: 0.0.2."
 ```
 
-It means you're trying to publish a version that already exists. Our CI system has been improved to handle this automatically, but if you need to fix it manually:
+It means you're trying to publish a version that already exists. Our CI system has been improved to
+handle this automatically, but if you need to fix it manually:
 
 1. Check the current published version:
 
