@@ -1,3 +1,4 @@
+---
 name: CI/CD Pipeline
 
 on:
@@ -193,4 +194,4 @@ jobs:
         with:
           coverage-token: ${{ secrets.QLTY_TOKEN }}
           files: coverage/lcov.info
-          tag: combined-coverage
+          tag: ${{ (github.ref == 'refs/heads/main') && 'main-coverage' || 'dev-coverage' }}
