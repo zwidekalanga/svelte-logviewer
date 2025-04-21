@@ -190,9 +190,23 @@ jobs:
             node merge-coverage.js
           fi
 
+      # Upload coverage to QLTY.sh with tags that match the Luijten branching strategy:
+      # - Version branches (*.x): version-{branch}-coverage (e.g., version-0.x-coverage)
+      # - Main branch (next major version): next-major-coverage
+      # - Other branches: {branch}-coverage
+      # - Tags: release-{tag}-coverage
+      # - PRs: pr-coverage
       - name: Upload coverage to qlty.sh
         uses: qltysh/qlty-action/coverage@main
         with:
           coverage-token: ${{ secrets.QLTY_TOKEN }}
           files: coverage/lcov.info
-          tag: ${{ contains(github.ref, 'refs/heads/') && format('{0}-coverage', github.ref_name) || contains(github.ref, 'refs/tags/') && format('release-{0}-coverage', github.ref_name) || 'pr-coverage' }}
+          tag: >-
+            ${{
+              contains(github.ref, 'refs/heads/') && 
+                (endsWith(github.ref_name, '.x') && format('version-{0}-coverage', github.ref_name) || 
+                 github.ref_name == 'main' && 'next-major-coverage' || 
+                 format('{0}-coverage', github.ref_name)) || 
+              contains(github.ref, 'refs/tags/') && format('release-{0}-coverage', github.ref_name) || 
+              'pr-coverage' 
+            }}

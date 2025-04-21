@@ -119,6 +119,7 @@ graph TD
    - Running unit tests and E2E tests in parallel
 
 2. When changes are pushed to version branches (e.g., `0.x`, `1.x`):
+
    - The CI/CD pipeline runs as above
    - The Changesets workflow checks for changesets in the `.changeset` directory
    - If changesets are found, a release PR is created or the changes are published
@@ -135,11 +136,13 @@ graph TD
 We follow the Luijten branching strategy for library development:
 
 1. **Branch Structure**:
+
    - `main` branch is always for the next major version development
    - Each major version has its own branch (e.g., `0.x`, `1.x`, `2.x`)
    - The current stable version branch is the default branch
 
 2. **Version Flow**:
+
    - Non-breaking changes: PR → current version branch → merge to `main`
    - Breaking changes: PR → `main` only
    - Bug fixes: PR → latest version → cherry-pick to previous versions

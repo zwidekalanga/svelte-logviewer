@@ -154,6 +154,7 @@ We use [Changesets](https://github.com/changesets/changesets) for versioning and
 #### Making Changes
 
 1. For non-breaking changes:
+
    - Create a feature branch from the current version branch (e.g., `0.x`)
    - Make your code changes
    - Run `yarn changeset` to create a changeset file
