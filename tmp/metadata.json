@@ -1,0 +1,18 @@
+{
+	"buildId": "14583118943:1",
+	"ci": "GitHub",
+	"branch": "chore/renaming-repo-to-lazylog",
+	"commitSha": "abba896cfc765138f07443ec255a81ad151c316a",
+	"commitMessage": "Merge abba896cfc765138f07443ec255a81ad151c316a into fc94641ce5d8c8fcf42cc8716699df30e45c1a7a\n",
+	"authorName": "Cyril Nxumalo",
+	"authorEmail": "80963114+zwidekalanga@users.noreply.github.com",
+	"authorTime": "2025-04-21T23:12:52+00:00",
+	"committerName": "GitHub",
+	"committerEmail": "noreply@github.com",
+	"commitTime": "2025-04-21T23:12:52+00:00",
+	"pullRequestNumber": "51",
+	"tag": "pr-coverage",
+	"uploadedAt": "2025-04-21T23:15:37.283885988+00:00",
+	"cliVersion": "0.516.0 linux-x64 (e837c15 2025-04-20)",
+	"publishCommand": "/opt/hostedtoolcache/qlty/latest/x64/qlty-x86_64-unknown-linux-gnu/qlty coverage publish --tag pr-coverage --override-commit-sha abba896cfc765138f07443ec255a81ad151c316a --override-branch chore/renaming-repo-to-lazylog /home/runner/work/svelte-lazylog/svelte-lazylog/coverage/lcov.info"
+}

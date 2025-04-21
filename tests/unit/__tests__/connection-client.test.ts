@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
 	ConnectionClient,
 	type ConnectionClientOptions
-} from '../../../src/lib/components/log-viewer/connection-client.js';
+} from '../../../src/lib/utils/connection/connection-client.js';
 
 // Create a concrete implementation of ConnectionClient for testing
 class TestConnectionClient extends ConnectionClient {

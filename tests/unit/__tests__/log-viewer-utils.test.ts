@@ -9,7 +9,7 @@ import {
 	getActiveMatchForLine,
 	getNextMatchIndex,
 	getPreviousMatchIndex
-} from '../log-viewer-utils.js';
+} from '../../../src/lib/components/lazylog/lazylog-utils.js';
 
 import type { LogLine } from '../../../../types/log-line.js';
 

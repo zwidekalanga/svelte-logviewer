@@ -1,6 +1,5 @@
 <script lang="ts">
-	import DownArrowIcon from '$lib/components/lucide/icons/down-arrow.svelte';
-	import UpArrowIcon from '$lib/components/lucide/icons/up-arrow.svelte';
+	import { DownArrow, UpArrow } from '$lib/lucide/index.js';
 
 	let {
 		searchText = '',
@@ -76,7 +75,7 @@
 				title="Previous match (Shift+Enter)"
 				aria-label="Previous search result"
 			>
-				<UpArrowIcon color="#d6d6d6" size={18} strokeWidth={3.5} />
+				<UpArrow color="#d6d6d6" size={18} strokeWidth={3.5} />
 			</button>
 			<button
 				onclick={handleNextClick}
@@ -84,7 +83,7 @@
 				title="Next match (Enter)"
 				aria-label="Next search result"
 			>
-				<DownArrowIcon color="#d6d6d6" size={18} strokeWidth={3.5} />
+				<DownArrow color="#d6d6d6" size={18} strokeWidth={3.5} />
 			</button>
 		</div>
 	{/if}

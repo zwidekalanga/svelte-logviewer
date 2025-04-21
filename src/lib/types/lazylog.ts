@@ -1,24 +1,19 @@
 import type { ComponentType } from 'svelte';
 
-export interface WebsocketOptions {
+/**
+ * Common options shared between WebSocket and EventSource connections
+ */
+export interface CommonConnectionOptions {
 	/**
-	 * Callback when the socket is opened
-	 */
-	onOpen?: ((e: Event, socket: WebSocket) => void) | undefined;
-	/**
-	 * Callback when the socket is closed
-	 */
-	onClose?: ((e: CloseEvent) => void) | undefined;
-	/**
-	 * Callback when the socket has an error
+	 * Callback when the connection has an error
 	 */
 	onError?: ((e: Event) => void) | undefined;
 	/**
-	 * Callback which formats the websocket data stream.
+	 * Callback which formats the data stream message.
 	 */
 	formatMessage?: ((message: unknown) => string) | undefined;
 	/**
-	 * Set to true, to reconnect the WebSocket automatically.
+	 * Set to true, to reconnect automatically.
 	 */
 	reconnect?: boolean;
 	/**
@@ -28,7 +23,18 @@ export interface WebsocketOptions {
 	reconnectWait?: number;
 }
 
-export interface EventSourceOptions {
+export interface WebsocketOptions extends CommonConnectionOptions {
+	/**
+	 * Callback when the socket is opened
+	 */
+	onOpen?: ((e: Event, socket: WebSocket) => void) | undefined;
+	/**
+	 * Callback when the socket is closed
+	 */
+	onClose?: ((e: CloseEvent) => void) | undefined;
+}
+
+export interface EventSourceOptions extends CommonConnectionOptions {
 	/**
 	 * Boolean indicating if CORS should be set to include credentials
 	 */
@@ -41,23 +47,6 @@ export interface EventSourceOptions {
 	 * Callback when the eventsource is closed
 	 */
 	onClose?: ((e: Event) => void) | undefined;
-	/**
-	 * Callback when the eventsource has an error
-	 */
-	onError?: ((e: Event) => void) | undefined;
-	/**
-	 * Callback which formats the eventsource data stream.
-	 */
-	formatMessage?: ((message: unknown) => string) | undefined;
-	/**
-	 * Set to true, to reconnect the EventSource automatically.
-	 */
-	reconnect?: boolean;
-	/**
-	 * Set the time to wait between reconnects in seconds.
-	 * Default is 1s
-	 */
-	reconnectWait?: number;
 	/**
 	 * Maximum number of events to process before closing the connection.
 	 * When undefined, all events will be processed.
@@ -76,7 +65,7 @@ export interface EventSourceOptions {
 	maxEmptyEvents?: number;
 }
 
-export interface LogViewerProps {
+export interface LazyLogProps {
 	/**
 	 * Flag to enable/disable case insensitive search
 	 */

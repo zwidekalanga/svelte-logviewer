@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-import { ConnectionClient } from '../../../src/lib/components/log-viewer/connection-client.js';
-import { EventSourceClient } from '../../../src/lib/components/log-viewer/eventsource-client.js';
+import { ConnectionClient } from '../../../src/lib/utils/connection/connection-client.js';
+import { EventSourceClient } from '../../../src/lib/utils/connection/eventsource-client.js';
 
 // Constants that match EventSource readyState values
 const ES_CONNECTING = 0;

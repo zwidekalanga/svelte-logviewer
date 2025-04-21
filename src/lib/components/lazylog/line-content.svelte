@@ -1,8 +1,8 @@
 <script lang="ts">
-	import LinePart from './log-viewer-line-part.svelte';
+	import LinePart from './line-part.svelte';
 
 	import type { LineContent } from '$lib/types/log-content.js';
-	import type { Match } from './log-viewer-utils.js';
+	import type { Match } from './lazylog-utils.js';
 
 	const {
 		content,

@@ -1,9 +1,9 @@
 <script lang="ts">
-	import LineContent from './log-viewer-line-content.svelte';
-	import LineNumber from './log-viewer-line-number.svelte';
+	import LineContent from './line-content.svelte';
+	import LineNumber from './line-number.svelte';
 
 	import type { LogLine } from '$lib/types/log-line.js';
-	import type { Match } from './log-viewer-utils.js';
+	import type { Match } from './lazylog-utils.js';
 
 	const {
 		line,

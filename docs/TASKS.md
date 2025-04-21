@@ -9,7 +9,7 @@ This document contains a comprehensive list of actionable improvement tasks for 
 3. [ ] Extract the resize observer logic into a separate utility or hook
 4. [ ] Implement a more robust error handling strategy with consistent error reporting across different data sources
 5. [ ] Remove the empty types.ts file or implement its intended purpose
-6. [ ] Split the large log-viewer.svelte file into smaller, more focused components
+6. [ ] Split the large lazylog.svelte file into smaller, more focused components
 7. [ ] Create a dedicated state management solution for complex state interactions
 
 ## Performance Optimizations

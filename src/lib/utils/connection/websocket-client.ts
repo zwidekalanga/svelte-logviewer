@@ -1,7 +1,7 @@
 import ConnectionClient from './connection-client.js';
 
 import type { ConnectionClientOptions } from './connection-client.js';
-import type { WebsocketOptions } from '../../../lib/types/log-viewer.js';
+import type { WebsocketOptions } from '../../../types/lazylog.js';
 
 export interface WebSocketClientOptions extends ConnectionClientOptions {
 	websocketOptions?: WebsocketOptions;
