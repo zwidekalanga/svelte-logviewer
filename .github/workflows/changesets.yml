@@ -4,7 +4,10 @@ name: Changesets
 on:
   push:
     branches:
-      - main
+      - '*.x'
+    paths:
+      - '.changeset/**'
+  workflow_dispatch:
 
 # These permissions are needed to interact with GitHub's API
 permissions:
@@ -67,3 +70,20 @@ jobs:
         with:
           folder: storybook-static
           branch: gh-pages
+
+      - name: Create Git Tag
+        if: steps.changesets.outputs.published == 'true'
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          git tag -a "v$VERSION" -m "Release v$VERSION"
+          git push origin "v$VERSION"
+
+      - name: Merge changes to main (for non-breaking changes)
+        if: steps.changesets.outputs.published == 'true'
+        run: |
+          git fetch origin main
+          git checkout main
+          git pull origin main
+          git merge --ff-only origin/$(echo $GITHUB_REF | sed 's/refs\/heads\///') || echo "Manual merge required - likely breaking changes"
+          git push origin main || echo "Could not push to main - manual merge required"
+        continue-on-error: true

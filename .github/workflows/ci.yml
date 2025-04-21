@@ -3,9 +3,10 @@ name: CI/CD Pipeline
 
 on:
   pull_request:
-    branches: [main, development]
+    branches: [main, '*.x']
   push:
-    branches: [main, development]
+    branches: [main, '*.x']
+    tags: ['v*']
   workflow_dispatch:
 
 # Restrict permissions to minimum required
@@ -194,4 +195,4 @@ jobs:
         with:
           coverage-token: ${{ secrets.QLTY_TOKEN }}
           files: coverage/lcov.info
-          tag: ${{ (github.ref == 'refs/heads/main') && 'main-coverage' || 'dev-coverage' }}
+          tag: ${{ contains(github.ref, 'refs/heads/') && format('{0}-coverage', github.ref_name) || contains(github.ref, 'refs/tags/') && format('release-{0}-coverage', github.ref_name) || 'pr-coverage' }}
