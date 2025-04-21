@@ -136,14 +136,14 @@ yarn test:unit:coverage
 yarn test:e2e:coverage
 
 # Merge coverage reports (after running both test suites with coverage)
-node merge-coverage.js
+node scripts/merge-coverage.js
 ```
 
 The merged coverage report can be found at `coverage/combined/index.html`.
 
 ### Contributing
 
-We use [Changesets](https://github.com/changesets/changesets) for versioning and publishing, and follow the [Luijten branching strategy](CICD.md#branching-strategy) for library development.
+We use [Changesets](https://github.com/changesets/changesets) for versioning and publishing, and follow the [Luijten branching strategy](docs/CICD.md#branching-strategy) for library development.
 
 #### Branching Strategy
 
@@ -175,7 +175,7 @@ Our CI/CD pipeline will:
 - Publish to npm (for pushes to version branches with changesets)
 - Automatically merge non-breaking changes back to `main`
 
-For more details, see the [Changesets documentation](.changeset/README.md) and the [CI/CD Pipeline documentation](CICD.md).
+For more details, see the [Changesets documentation](.changeset/README.md) and the [CI/CD Pipeline documentation](docs/CICD.md).
 
 ## Examples
 
@@ -208,6 +208,16 @@ const props: LogViewerProps = {
 	enableSearch: true
 };
 ```
+
+## Documentation
+
+Additional documentation is available in the `docs` directory:
+
+- [Changelog](docs/CHANGELOG.md) - Version history and changes
+- [CI/CD Pipeline](docs/CICD.md) - Details about the CI/CD workflow
+- [Contributing Guide](docs/CONTRIBUTING.md) - Guidelines for contributors
+- [Publishing Guide](docs/PUBLISHING.md) - Instructions for publishing new versions
+- [Reset NPM Instructions](docs/RESET-NPM.md) - How to reset NPM configuration
 
 ## License
 
