@@ -3,9 +3,10 @@ name: CI/CD Pipeline
 
 on:
   pull_request:
-    branches: [main, development]
+    branches: [main, '*.x']
   push:
-    branches: [main, development]
+    branches: [main, '*.x']
+    tags: ['v*']
   workflow_dispatch:
 
 # Restrict permissions to minimum required
@@ -189,9 +190,23 @@ jobs:
             node merge-coverage.js
           fi
 
+      # Upload coverage to QLTY.sh with tags that match the Luijten branching strategy:
+      # - Version branches (*.x): version-{branch}-coverage (e.g., version-0.x-coverage)
+      # - Main branch (next major version): next-major-coverage
+      # - Other branches: {branch}-coverage
+      # - Tags: release-{tag}-coverage
+      # - PRs: pr-coverage
       - name: Upload coverage to qlty.sh
         uses: qltysh/qlty-action/coverage@main
         with:
           coverage-token: ${{ secrets.QLTY_TOKEN }}
           files: coverage/lcov.info
-          tag: ${{ (github.ref == 'refs/heads/main') && 'main-coverage' || 'dev-coverage' }}
+          tag: >-
+            ${{
+              contains(github.ref, 'refs/heads/') && 
+                (endsWith(github.ref_name, '.x') && format('version-{0}-coverage', github.ref_name) || 
+                 github.ref_name == 'main' && 'next-major-coverage' || 
+                 format('{0}-coverage', github.ref_name)) || 
+              contains(github.ref, 'refs/tags/') && format('release-{0}-coverage', github.ref_name) || 
+              'pr-coverage' 
+            }}
