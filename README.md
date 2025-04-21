@@ -136,30 +136,46 @@ yarn test:unit:coverage
 yarn test:e2e:coverage
 
 # Merge coverage reports (after running both test suites with coverage)
-node merge-coverage.js
+node scripts/merge-coverage.js
 ```
 
 The merged coverage report can be found at `coverage/combined/index.html`.
 
 ### Contributing
 
-We use [Changesets](https://github.com/changesets/changesets) for versioning and publishing. When making changes:
+We use [Changesets](https://github.com/changesets/changesets) for versioning and publishing, and follow the [Luijten branching strategy](docs/CICD.md#branching-strategy) for library development.
 
-1. Make your code changes
-2. Run `yarn changeset` to create a changeset file
-3. Select the type of version bump (patch, minor, major)
-4. Write a description of your changes
-5. Commit the changeset file along with your code changes
+#### Branching Strategy
+
+- `main` branch is reserved for the next major version development
+- Each major version has its own branch (e.g., `0.x`, `1.x`, `2.x`)
+- The current stable version branch is the default branch
+
+#### Making Changes
+
+1. For non-breaking changes:
+
+   - Create a feature branch from the current version branch (e.g., `0.x`)
+   - Make your code changes
+   - Run `yarn changeset` to create a changeset file
+   - Create a PR targeting the current version branch
+
+2. For breaking changes:
+   - Create a feature branch from `main`
+   - Make your code changes
+   - Run `yarn changeset major` to create a changeset file for a major version bump
+   - Create a PR targeting `main`
 
 Our CI/CD pipeline will:
 
 - Run linting and type checking
 - Build the package
 - Run unit tests and E2E tests in parallel
-- Build and deploy documentation (for pushes to main)
-- Publish to npm (for pushes to main with changesets)
+- Build and deploy documentation (for pushes to version branches)
+- Publish to npm (for pushes to version branches with changesets)
+- Automatically merge non-breaking changes back to `main`
 
-For more details, see the [Changesets documentation](.changeset/README.md) and the [CI/CD Pipeline documentation](CICD.md).
+For more details, see the [Changesets documentation](.changeset/README.md) and the [CI/CD Pipeline documentation](docs/CICD.md).
 
 ## Examples
 
@@ -192,6 +208,16 @@ const props: LogViewerProps = {
 	enableSearch: true
 };
 ```
+
+## Documentation
+
+Additional documentation is available in the `docs` directory:
+
+- [Changelog](docs/CHANGELOG.md) - Version history and changes
+- [CI/CD Pipeline](docs/CICD.md) - Details about the CI/CD workflow
+- [Contributing Guide](docs/CONTRIBUTING.md) - Guidelines for contributors
+- [Publishing Guide](docs/PUBLISHING.md) - Instructions for publishing new versions
+- [Reset NPM Instructions](docs/RESET-NPM.md) - How to reset NPM configuration
 
 ## License
 
