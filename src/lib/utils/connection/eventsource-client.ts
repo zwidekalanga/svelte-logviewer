@@ -1,7 +1,7 @@
 import ConnectionClient from './connection-client.js';
 
 import type { ConnectionClientOptions } from './connection-client.js';
-import type { EventSourceOptions } from '../../../lib/types/log-viewer.js';
+import type { EventSourceOptions } from '../../../types/lazylog.js';
 
 export interface EventSourceClientOptions extends ConnectionClientOptions {
 	eventsourceOptions?: EventSourceOptions;

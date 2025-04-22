@@ -1,4 +1,4 @@
-import type { LogViewerProps } from '$lib/types/log-viewer.js';
+import type { LazyLogProps } from '$lib/types/lazylog.js';
 
 // Re-export all utility functions from the utils directory
 export {
@@ -36,9 +36,9 @@ export {
 export type { Match } from './utils/search.js';
 
 /**
- * Default properties for the LogViewer component
+ * Default properties for the LazyLog component
  */
-export const DEFAULT_PROPS: LogViewerProps = {
+export const DEFAULT_PROPS: LazyLogProps = {
 	containerStyle: { height: 'calc(100% - 40px)' },
 	caseInsensitive: false,
 	enableGutters: false,

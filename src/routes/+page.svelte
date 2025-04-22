@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { LogViewer } from '$lib';
+	import { LazyLog } from '$lib';
 
 	// Example log content
 	const exampleLog = `
@@ -16,7 +16,7 @@
 
 <div class="container mx-auto px-4 py-8">
 	<header class="mb-8">
-		<h1 class="mb-2 text-3xl font-bold">Svelte LogViewer</h1>
+		<h1 class="mb-2 text-3xl font-bold">Svelte LazyLog</h1>
 		<p class="text-lg text-gray-600">
 			A powerful, customizable log viewer component for Svelte applications
 		</p>
@@ -25,32 +25,32 @@
 	<section class="mb-8">
 		<h2 class="mb-4 text-2xl font-semibold">Demo</h2>
 		<div class="overflow-hidden rounded-lg border shadow-sm">
-			<LogViewer logContent={exampleLog} />
+			<LazyLog text={exampleLog} />
 		</div>
 	</section>
 
 	<section class="mb-8">
 		<h2 class="mb-4 text-2xl font-semibold">Installation</h2>
 		<pre
-			class="overflow-x-auto rounded-lg bg-gray-100 p-4">npm install @zwidekalanga/svelte-logviewer</pre>
+			class="overflow-x-auto rounded-lg bg-gray-100 p-4">npm install @zwidekalanga/svelte-lazylog</pre>
 		<p class="mt-2">or</p>
 		<pre
-			class="overflow-x-auto rounded-lg bg-gray-100 p-4">yarn add @zwidekalanga/svelte-logviewer</pre>
+			class="overflow-x-auto rounded-lg bg-gray-100 p-4">yarn add @zwidekalanga/svelte-lazylog</pre>
 	</section>
 
 	<section class="mb-8">
 		<h2 class="mb-4 text-2xl font-semibold">Usage</h2>
 		<pre class="overflow-x-auto rounded-lg bg-gray-100 p-4">
-import {LogViewer} from '@zwidekalanga/svelte-logviewer';
+import {LazyLog} from '@zwidekalanga/svelte-lazylog';
 
 // Then in your component
-&lt;LogViewer logContent={'{yourLogContent}'} /&gt;</pre>
+&lt;LazyLog text={'{yourLogContent}'} /&gt;</pre>
 	</section>
 
 	<footer class="text-center text-sm text-gray-500">
 		<p>
 			View the <a
-				href="https://github.com/zwidekalanga/svelte-logviewer"
+				href="https://github.com/zwidekalanga/svelte-lazylog"
 				class="text-blue-500 hover:underline">GitHub repository</a
 			> for more information
 		</p>

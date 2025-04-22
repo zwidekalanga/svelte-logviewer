@@ -1,7 +1,7 @@
-# Svelte LogViewer
+# Svelte LazyLog
 
-[![Maintainability](https://qlty.sh/badges/4b8be42b-0d13-4763-9514-2a795940ea89/maintainability.svg)](https://qlty.sh/gh/zwidekalanga/projects/svelte-logviewer)
-[![Code Coverage](https://qlty.sh/badges/4b8be42b-0d13-4763-9514-2a795940ea89/test_coverage.svg)](https://qlty.sh/gh/zwidekalanga/projects/svelte-logviewer)
+[![Maintainability](https://qlty.sh/badges/4b8be42b-0d13-4763-9514-2a795940ea89/maintainability.svg)](https://qlty.sh/gh/zwidekalanga/projects/svelte-lazylog)
+[![Code Coverage](https://qlty.sh/badges/4b8be42b-0d13-4763-9514-2a795940ea89/test_coverage.svg)](https://qlty.sh/gh/zwidekalanga/projects/svelte-lazylog)
 
 A Svelte component for displaying and streaming log files with syntax highlighting, search functionality, and more.
 
@@ -18,13 +18,13 @@ A Svelte component for displaying and streaming log files with syntax highlighti
 ## Installation
 
 ```bash
-npm install @zwidekalanga/svelte-logviewer
+npm install @zwidekalanga/svelte-lazylog
 ```
 
 or
 
 ```bash
-yarn add @zwidekalanga/svelte-logviewer
+yarn add @zwidekalanga/svelte-lazylog
 ```
 
 ## Usage
@@ -33,10 +33,10 @@ yarn add @zwidekalanga/svelte-logviewer
 
 ```svelte
 <script>
-	import { LogViewer } from '@zwidekalanga/svelte-logviewer';
+	import { LazyLog } from '@zwidekalanga/svelte-lazylog';
 </script>
 
-<LogViewer
+<LazyLog
 	text="This is a sample log text\nWith multiple lines\nAnd more content"
 	height="400px"
 	enableLineNumbers={true}
@@ -48,10 +48,10 @@ yarn add @zwidekalanga/svelte-logviewer
 
 ```svelte
 <script>
-	import { LogViewer } from '@zwidekalanga/svelte-logviewer';
+	import { LazyLog } from '@zwidekalanga/svelte-lazylog';
 </script>
 
-<LogViewer
+<LazyLog
 	url="wss://api.example.com/logs/stream"
 	websocket={true}
 	follow={true}
@@ -64,10 +64,10 @@ yarn add @zwidekalanga/svelte-logviewer
 
 ```svelte
 <script>
-	import { LogViewer } from '@zwidekalanga/svelte-logviewer';
+	import { LazyLog } from '@zwidekalanga/svelte-lazylog';
 </script>
 
-<LogViewer
+<LazyLog
 	url="https://api.example.com/logs/stream"
 	eventsource={true}
 	follow={true}
@@ -200,10 +200,10 @@ Supports all modern browsers including:
 This library includes TypeScript type definitions for all components and props.
 
 ```typescript
-import { LogViewer } from '@zwidekalanga/svelte-logviewer';
-import type { LogViewerProps } from '@zwidekalanga/svelte-logviewer';
+import { LazyLog } from '@zwidekalanga/svelte-lazylog';
+import type { LazyLogProps } from '@zwidekalanga/svelte-lazylog';
 
-const props: LogViewerProps = {
+const props: LazyLogProps = {
 	text: 'Sample log content',
 	enableSearch: true
 };

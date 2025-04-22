@@ -2,9 +2,6 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { VList } from 'virtua/svelte';
 
-	import EventSourceClient from './eventsource-client.js';
-	import Line from './log-viewer-line.svelte';
-	import SearchBar from './log-viewer-search-bar.svelte';
 	import {
 		DEFAULT_PROPS,
 		processText,
@@ -15,12 +12,15 @@
 		getNextMatchIndex,
 		getPreviousMatchIndex,
 		type Match
-	} from './log-viewer-utils.js';
-	import WebSocketClient from './websocket-client.js';
+	} from './lazylog-utils.js';
+	import Line from './line.svelte';
+	import SearchBar from './search-bar.svelte';
 
+	import type { LazyLogProps } from '$lib/types/lazylog.js';
 	import type { LogLine } from '$lib/types/log-line.js';
-	import type { LogViewerProps } from '$lib/types/log-viewer.js';
 	import type { SvelteComponent } from 'svelte';
+
+	import { EventSourceClient, WebSocketClient } from '$lib/utils/connection/index.js';
 
 	const props = $props();
 
@@ -35,7 +35,7 @@
 		text,
 		stream,
 		...restProps
-	}: LogViewerProps = {
+	}: LazyLogProps = {
 		...DEFAULT_PROPS,
 		...props
 	};
@@ -239,7 +239,7 @@
 	}
 
 	function handleConnectionError(error: Error) {
-		console.error('Connection error in log-viewer:', error);
+		console.error('Connection error in lazylog:', error);
 		if (typeof restProps.onError === 'function') {
 			restProps.onError(error);
 		}
@@ -276,7 +276,7 @@
 </script>
 
 <div
-	class="log-viewer"
+	class="lazylog"
 	style="height: {height}; width: {width}; {Object.entries(style ?? {})
 		.map(([k, v]) => `${k}: ${v}`)
 		.join(';')}"
@@ -319,7 +319,7 @@
 </div>
 
 <style>
-	.log-viewer {
+	.lazylog {
 		background: #222;
 		color: #ffffff;
 		overflow: hidden;

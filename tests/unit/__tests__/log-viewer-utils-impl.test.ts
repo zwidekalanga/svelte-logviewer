@@ -10,7 +10,7 @@ import {
 	getNextMatchIndex,
 	getPreviousMatchIndex,
 	DEFAULT_PROPS
-} from '../../../src/lib/components/log-viewer/log-viewer-utils.js';
+} from '../../../src/lib/components/lazylog/lazylog-utils.js';
 
 import type { LogLine } from '../../../src/lib/types/log-line.js';
 

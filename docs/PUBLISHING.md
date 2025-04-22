@@ -27,13 +27,13 @@ The library is configured for easy consumption in other SvelteKit or Svelte proj
 
 ```js
 // Import the main component
-import { LogViewer } from '@zwidekalanga/svelte-logviewer';
+import { LazyLog } from '@zwidekalanga/svelte-lazylog';
 
 // Import specific component directly (if needed)
-import { LogViewer } from '@zwidekalanga/svelte-logviewer/dist/components/log-viewer';
+import { LazyLog } from '@zwidekalanga/svelte-lazylog/dist/components/lazylog';
 
 // Import types
-import type { LogViewerProps } from '@zwidekalanga/svelte-logviewer';
+import type { LazyLogProps } from '@zwidekalanga/svelte-lazylog';
 ```
 
 ## Automatic Publishing via GitHub Actions
@@ -89,7 +89,7 @@ If you need to publish manually:
 yarn npm login
 
 # Check the latest published version
-yarn npm view @zwidekalanga/svelte-logviewer version
+yarn npm view @zwidekalanga/svelte-lazylog version
 
 # Build the package
 yarn package
@@ -117,7 +117,7 @@ handle this automatically, but if you need to fix it manually:
 1. Check the current published version:
 
    ```
-   yarn npm view @zwidekalanga/svelte-logviewer version
+   yarn npm view @zwidekalanga/svelte-lazylog version
    ```
 
 2. Update your local version to a higher number:
@@ -142,6 +142,6 @@ If the GitHub Actions publish step fails, check:
 
 ## Package Information
 
-- Package name: `@zwidekalanga/svelte-logviewer`
+- Package name: `@zwidekalanga/svelte-lazylog`
 - Public access: Yes (this is required for scoped packages)
 - Registry: npmjs.org

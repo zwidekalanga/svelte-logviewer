@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-import { processText, isHighlighted, findMatches } from '../log-viewer-utils.js';
+import { processText, isHighlighted, findMatches } from '../lazylog-utils.js';
 
 // For Svelte 5 compatibility, we'll test utilities individually instead
 // of trying to render the component directly in JSDOM
