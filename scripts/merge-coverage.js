@@ -25,10 +25,7 @@ const coverageMap = libCoverage.createCoverageMap({});
 function normalizePaths(coverage) {
 	const normalizedCoverage = {};
 	// Common workspace paths to check for and remove
-	const workspacePaths = [
-		'/home/runner/work/svelte-logviewer/svelte-logviewer/',
-		process.cwd() + '/'
-	];
+	const workspacePaths = ['/home/runner/work/svelte-lazylog/svelte-lazylog/', process.cwd() + '/'];
 
 	Object.keys(coverage).forEach((key) => {
 		let normalizedKey = key;
