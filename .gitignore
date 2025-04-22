@@ -12,6 +12,7 @@ node_modules
 /.svelte-kit
 /build
 /dist
+/tmp
 
 # Test reports and coverage
 /coverage
@@ -35,3 +36,4 @@ Thumbs.db
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+/tmp
