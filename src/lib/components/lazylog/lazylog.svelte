@@ -146,7 +146,7 @@
 			}
 		}
 
-		// Set up resize observer to recalculate line wrapping when container size changes
+		// Set up a resize observer to recalculate line wrapping when the container size changes
 		if (containerElement) {
 			resizeObserver = new ResizeObserver((entries) => {
 				for (const entry of entries) {
@@ -215,7 +215,7 @@
 		// Append to existing lines
 		lines = [...lines, ...newLines];
 
-		// Update search results if search is active
+		// Update search results if the search is active
 		if (searchText && searchText.length >= (restProps.searchMinCharacters ?? 3)) {
 			matches = findMatches(
 				lines,
@@ -225,7 +225,7 @@
 			);
 		}
 
-		// Auto-scroll to bottom if follow is enabled
+		// Auto-scroll to the bottom if follow is enabled
 		if (
 			restProps.follow &&
 			virtualContainer &&
@@ -322,7 +322,8 @@
 	.lazylog {
 		background: #222;
 		color: #ffffff;
-		overflow: hidden;
+		overflow-y: auto;
+		overflow-x: auto;
 		font-family: Monaco, monospace;
 		font-size: 12px;
 		scrollbar-color: #666 #222;
@@ -330,6 +331,7 @@
 
 	:global(.svelte-lazylog-content) {
 		height: 100%;
+		overflow-x: auto;
 		scrollbar-color: #666 #222; /* For Firefox */
 	}
 </style>

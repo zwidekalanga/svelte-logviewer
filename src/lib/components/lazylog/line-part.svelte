@@ -137,7 +137,7 @@
 	.wrapped {
 		white-space: normal;
 		word-wrap: break-word;
-		word-break: break-all;
+		word-break: break-word;
 	}
 
 	.highlight {

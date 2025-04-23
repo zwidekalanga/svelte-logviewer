@@ -107,7 +107,7 @@
 						return `${timestamp} [${wiki}] Page "${data.title}" was ${data.type} by ${data.user || 'unknown'}`;
 					}
 
-					// For other messages, return empty string to skip them
+					// For other messages, return an empty string to skip them
 					return '';
 					// eslint-disable-next-line @typescript-eslint/no-unused-vars
 				} catch (_) {
@@ -131,7 +131,7 @@
 <Story
 	name="Line Wrapping"
 	args={{
-		text: `This is a line that should be wrapped when the wrapLines option is enabled. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\nNormal short line\nAnother very long line that demonstrates the wrapping functionality in action. The text should wrap to the next line rather than extending beyond the container causing horizontal scrolling. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.\nThis line includes some ANSI \x1b[31mred text\x1b[0m and \x1b[32mgreen text\x1b[0m that is very long to demonstrate that wrapping works with ANSI color codes too. The colored text should flow naturally to the next line when it reaches the edge of the container.\nThe end.`,
+		text: `[vcs 2018-11-14T21:13:38.469Z] PERFHERDER_DATA: {"framework": {"name": "vcs"}, "suites": [{"extraOptions": ["m3.xlarge"], "lowerIsBetter": true, "name": "clone", "shouldAlert": false, "subtests": [], "value": 156.62339401245117}, {"extraOptions": ["m3.xlarge"], "lowerIsBetter": true, "name": "pull", "shouldAlert": false, "subtests": [], "value": 13.032690048217773}, {"extraOptions": ["m3.xlarge"], "lowerIsBetter": true, "name": "update", "shouldAlert": false, "subtests": [], "value": 98.61538600921631}, {"extraOptions": ["m3.xlarge"], "lowerIsBetter": true, "name": "overall", "shouldAlert": false, "subtests": [], "value": 270.7935130596161}]}`,
 		wrapLines: true,
 		height: '600px',
 		style: {

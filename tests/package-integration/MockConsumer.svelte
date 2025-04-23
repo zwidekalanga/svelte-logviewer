@@ -8,7 +8,7 @@
 </script>
 
 <div class="mock-consumer">
-	<h2>LogViewer Test</h2>
+	<h2>LazyLog Test</h2>
 	<div class="log-container">
 		<LazyLog text={sampleText} height="200px" enableSearch={true} {...props} />
 	</div>

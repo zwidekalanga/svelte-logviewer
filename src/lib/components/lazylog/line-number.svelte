@@ -17,7 +17,7 @@
 		-webkit-user-select: none;
 		user-select: none;
 		text-align: right;
-		min-width: 40px;
+		min-width: 55px; /* temporary fix for spacing issues caused by line wrapping */
 		cursor: pointer;
 		text-decoration: none;
 		padding-right: 1em;

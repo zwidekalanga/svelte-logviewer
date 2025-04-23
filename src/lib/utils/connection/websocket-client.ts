@@ -1,7 +1,7 @@
 import ConnectionClient from './connection-client.js';
 
+import type { WebsocketOptions } from '$lib/types/lazylog.js';
 import type { ConnectionClientOptions } from './connection-client.js';
-import type { WebsocketOptions } from '../../../types/lazylog.js';
 
 export interface WebSocketClientOptions extends ConnectionClientOptions {
 	websocketOptions?: WebsocketOptions;
@@ -20,7 +20,14 @@ export class WebSocketClient extends ConnectionClient {
 	constructor(config: WebSocketClientOptions) {
 		super({
 			url: config.url,
-			options: config.websocketOptions || {},
+			options: config.websocketOptions
+				? {
+						...config.websocketOptions,
+						onClose: config.websocketOptions?.onClose
+							? (e: Event) => config.websocketOptions?.onClose?.(e as CloseEvent)
+							: undefined
+					}
+				: {},
 			onMessage: config.onMessage,
 			onError: config.onError
 		});
@@ -36,12 +43,16 @@ export class WebSocketClient extends ConnectionClient {
 			this.connection.onopen = (e: Event) => {
 				console.log('WebSocket connection established');
 				if (typeof this.options.onOpen === 'function') {
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+					// @ts-expect-error
 					this.options.onOpen(e, this.connection!);
 				}
 			};
 
 			this.connection.onmessage = (event: MessageEvent) => {
 				// Format the message using the base class method
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-expect-error
 				const messageText = this.formatMessageData(event.data);
 
 				// Pass the message to the caller

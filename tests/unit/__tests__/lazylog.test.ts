@@ -5,7 +5,9 @@ import LazyLog from '../../../src/lib/components/lazylog/lazylog.svelte';
 
 // Mock ResizeObserver
 global.ResizeObserver = class ResizeObserver {
-	constructor(callback) {
+	private callback: ResizeObserverCallback;
+
+	constructor(callback: ResizeObserverCallback) {
 		this.callback = callback;
 	}
 	observe() {}
