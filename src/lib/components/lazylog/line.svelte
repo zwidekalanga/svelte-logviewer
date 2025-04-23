@@ -44,16 +44,18 @@
 
 <style>
 	.line {
-		/* display: block; 	*/
-		/* font-family: monospace; */
+		display: flex;
+		/*font-family: monospace;*/
 		line-height: 1.5;
 		white-space: nowrap;
+		width: fit-content;
+		min-width: 100%;
 	}
 
+	/* When line wrapping is enabled, we don't want fit-content width */
 	.line.wrapped {
+		width: 100%;
 		white-space: normal;
-		word-wrap: break-word;
-		word-break: break-all;
 	}
 
 	.line:hover {

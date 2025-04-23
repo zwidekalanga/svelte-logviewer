@@ -12,8 +12,7 @@ describe.skip('LazyLog Components', () => {
 		it('should render without errors', () => {
 			const { container } = render(Line, {
 				props: {
-					data: 'sample log line',
-					number: 1
+					line: { content: [{ text: 'sample log line' }], number: 1 }
 				}
 			});
 			expect(container).toBeDefined();
@@ -35,7 +34,7 @@ describe.skip('LazyLog Components', () => {
 		it('should render without errors', () => {
 			const { container } = render(LineContent, {
 				props: {
-					data: 'sample content'
+					content: [{ text: 'sample content' }]
 				}
 			});
 			expect(container).toBeDefined();

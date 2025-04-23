@@ -2,10 +2,9 @@
  * Utility functions for processing text into LogLine objects
  */
 
-import { processTextWithWrapping } from './line-wrapping.js';
-import { parseAnsi } from '../../../utils/ansi-parser.js';
-
 import type { LogLine } from '$lib/types/log-line.js';
+
+import { parseAnsi } from '$lib/utils/ansi-parser.js';
 
 /**
  * Process text without line wrapping
@@ -25,22 +24,11 @@ export function processTextWithoutWrapping(text: string, startLineNumber: number
  * Process text into LogLine objects
  *
  * @param text - The text to process
- * @param wrapLines - Whether to wrap lines
- * @param maxLineLength - The maximum length of a line
  * @param startLineNumber - The starting line number
  * @returns An array of LogLine objects
  */
-export function processText(
-	text: string,
-	wrapLines = false,
-	maxLineLength = 100,
-	startLineNumber = 1
-): LogLine[] {
-	// Standard processing without wrapping
-	if (!wrapLines) {
-		return processTextWithoutWrapping(text, startLineNumber);
-	}
-
-	// Process with line wrapping
-	return processTextWithWrapping(text, maxLineLength, startLineNumber);
+export function processText(text: string, startLineNumber = 1): LogLine[] {
+	// Always use standard processing without manual wrapping
+	// CSS-based wrapping will be applied via the 'wrapped' class
+	return processTextWithoutWrapping(text, startLineNumber);
 }

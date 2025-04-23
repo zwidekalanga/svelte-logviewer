@@ -1,4 +1,4 @@
-import { expect, test } from './coverage-setup';
+import { expect, test } from './coverage-setup.js';
 
 test('Basic page navigation works', async ({ page }) => {
 	// Go to the home page
@@ -14,7 +14,7 @@ test('LazyLog search functionality works if present', async ({ page }) => {
 	// Check if search is enabled
 	const searchBar = page.locator('.svelte-lazylog-searchbar');
 	if (await searchBar.isVisible()) {
-		// Type into search bar - search for INFO which exists in the example log
+		// Type into the search bar-search for INFO which exists in the example log
 		await searchBar.locator('input').fill('INFO');
 
 		// Wait for search results

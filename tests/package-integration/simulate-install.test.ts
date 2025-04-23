@@ -9,7 +9,7 @@ describe.skip('Package installation simulation', () => {
 
 	// Create a minimal test project that imports the package
 	beforeAll(() => {
-		// Create directory if it doesn't exist
+		// Create a directory if it doesn't exist
 		if (!fs.existsSync(testProjectDir)) {
 			fs.mkdirSync(testProjectDir, { recursive: true });
 		}
@@ -21,7 +21,7 @@ describe.skip('Package installation simulation', () => {
 			dependencies: {
 				svelte: '^5.0.0',
 				virtua: '^0.39.3',
-				'@zwidekalanga/svelte-logviewer': 'file:../../'
+				'@zwidekalanga/svelte-lazylog': 'file:../../'
 			}
 		};
 
@@ -30,12 +30,12 @@ describe.skip('Package installation simulation', () => {
 			JSON.stringify(packageJson, null, 2)
 		);
 
-		// Create a Svelte file that uses the LogViewer
+		// Create a Svelte file that uses the LazyLog
 		const svelteFile = `<script>
-      import { LogViewer } from '@zwidekalanga/svelte-logviewer';
+      import { LazyLog } from '@zwidekalanga/svelte-lazylog';
     </script>
-    
-    <LogViewer 
+
+    <LazyLog 
       text="This is a test log" 
       height="300px" 
       enableSearch={true} 
@@ -65,7 +65,7 @@ describe.skip('Package installation simulation', () => {
 			testProjectDir,
 			'node_modules',
 			'@zwidekalanga',
-			'svelte-logviewer'
+			'svelte-lazylog'
 		);
 		expect(fs.existsSync(nodeModulesPath)).toBe(true);
 

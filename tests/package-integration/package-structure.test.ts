@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { describe, it, expect } from 'vitest';
 
-// Helper function to check if file exists
+// Helper function to check if a file exists
 const fileExists = (filePath: string): boolean => {
 	return fs.existsSync(filePath);
 };
@@ -33,15 +33,15 @@ describe('Package structure', () => {
 		expect(fs.statSync(utilsDir).isDirectory()).toBe(true);
 	});
 
-	it('should have the log-viewer component files', () => {
-		const logViewerDir = path.join(distPath, 'components', 'log-viewer');
+	it('should have the lazylog component files', () => {
+		const logViewerDir = path.join(distPath, 'components', 'lazylog');
 		expect(fs.existsSync(logViewerDir)).toBe(true);
 
-		// Check for component file
-		expect(fileExists(path.join(logViewerDir, 'log-viewer.svelte'))).toBe(true);
-		expect(fileExists(path.join(logViewerDir, 'log-viewer.svelte.d.ts'))).toBe(true);
+		// Check for a component file
+		expect(fileExists(path.join(logViewerDir, 'lazylog.svelte'))).toBe(true);
+		expect(fileExists(path.join(logViewerDir, 'lazylog.svelte.d.ts'))).toBe(true);
 
-		// Check for component index file
+		// Check for a component index file
 		expect(fileExists(path.join(logViewerDir, 'index.js'))).toBe(true);
 		expect(fileExists(path.join(logViewerDir, 'index.d.ts'))).toBe(true);
 	});
@@ -49,7 +49,7 @@ describe('Package structure', () => {
 	it('should have properly exported type files', () => {
 		const typesDir = path.join(distPath, 'types');
 
-		expect(fileExists(path.join(typesDir, 'log-viewer.d.ts'))).toBe(true);
+		expect(fileExists(path.join(typesDir, 'lazylog.d.ts'))).toBe(true);
 		expect(fileExists(path.join(typesDir, 'log-line.d.ts'))).toBe(true);
 		expect(fileExists(path.join(typesDir, 'log-content.d.ts'))).toBe(true);
 		expect(fileExists(path.join(typesDir, 'ansiparse.d.ts'))).toBe(true);

@@ -13,13 +13,13 @@ export {
 // Re-export from highlighting.ts
 export { isHighlighted } from './highlighting.js';
 
-// Re-export from line-wrapping.ts
-export {
-	shouldWrapLine,
-	createWrappedChunk,
-	processWrappedLine,
-	processTextWithWrapping
-} from './line-wrapping.js';
+// Line wrapping is now handled via CSS, so we no longer need these exports
+// export {
+// 	shouldWrapLine,
+// 	createWrappedChunk,
+// 	processWrappedLine,
+// 	processTextWithWrapping
+// } from './line-wrapping.js';
 
 // Re-export from search.ts
 export {

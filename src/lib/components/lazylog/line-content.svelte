@@ -53,14 +53,15 @@
 
 <style>
 	.line-content {
-		padding-left: 10px;
 		flex: 1;
 		white-space: nowrap;
 	}
 
 	.line-content.wrapped {
 		white-space: normal;
+		text-indent: 0;
+		display: inline-block;
 		word-wrap: break-word;
-		word-break: break-all;
+		word-break: break-word;
 	}
 </style>

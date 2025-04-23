@@ -44,10 +44,12 @@ export function stripAnsiCodes(text: string): string {
 
 /**
  * Splits text at a visible position while preserving ANSI codes
+ * Attempts to split at whitespace or word boundaries when possible
  */
 export function splitAtVisiblePosition(text: string, maxVisibleLength: number): [string, string] {
 	let visibleLength = 0;
 	let actualPosition = 0;
+	let lastWhitespacePosition = -1;
 	let inEscapeSequence = false;
 	const ESC = '\u001b'; // ESC character
 
@@ -64,9 +66,19 @@ export function splitAtVisiblePosition(text: string, maxVisibleLength: number): 
 			continue;
 		}
 
+		// Track the position of whitespace characters
+		if (/\s/.test(text[i])) {
+			lastWhitespacePosition = i;
+		}
+
 		visibleLength++;
 		if (visibleLength > maxVisibleLength) {
-			actualPosition = i;
+			// If we found a whitespace within a reasonable distance, use that as the split point
+			if (lastWhitespacePosition !== -1 && i - lastWhitespacePosition < 15) {
+				actualPosition = lastWhitespacePosition + 1; // Split after the whitespace
+			} else {
+				actualPosition = i;
+			}
 			break;
 		}
 	}

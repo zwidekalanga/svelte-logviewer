@@ -4,7 +4,7 @@ import { describe, it, expect } from 'vitest';
 import MockConsumer from './MockConsumer.svelte';
 
 // Skip rendering tests for now since they require a browser environment
-describe.skip('LogViewer component rendering', () => {
+describe.skip('LazyLog component rendering', () => {
 	it('should render the component when imported', () => {
 		const { container } = render(MockConsumer, {
 			props: {
@@ -13,7 +13,7 @@ describe.skip('LogViewer component rendering', () => {
 		});
 
 		// Verify the component rendered
-		expect(container.querySelector('.log-viewer')).not.toBeNull();
+		expect(container.querySelector('.lazy-log')).not.toBeNull();
 
 		// Verify search bar is present
 		expect(container.querySelector('input[type="text"]')).not.toBeNull();
@@ -36,8 +36,8 @@ describe.skip('LogViewer component rendering', () => {
 		});
 
 		// Check if height is applied
-		const logViewer = container.querySelector('.log-viewer');
-		expect(logViewer).not.toBeNull();
-		expect(logViewer?.getAttribute('style')).toContain('height: 300px');
+		const lazyLog = container.querySelector('.lazy-log');
+		expect(lazyLog).not.toBeNull();
+		expect(lazyLog?.getAttribute('style')).toContain('height: 300px');
 	});
 });

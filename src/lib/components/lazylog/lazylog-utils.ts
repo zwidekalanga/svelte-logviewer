@@ -11,12 +11,6 @@ export {
 	// Highlighting
 	isHighlighted,
 
-	// Line wrapping
-	shouldWrapLine,
-	createWrappedChunk,
-	processWrappedLine,
-	processTextWithWrapping,
-
 	// Search
 	findMatchesInPart,
 	findMatchesInLine,
