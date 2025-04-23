@@ -1,5 +1,11 @@
 # @zwidekalanga/svelte-logviewer
 
+## 0.0.5
+
+### Patch Changes
+
+- c73d7fa: Fix line wrapping and hover behavior
+
 ## 0.0.4
 
 ### Patch Changes
