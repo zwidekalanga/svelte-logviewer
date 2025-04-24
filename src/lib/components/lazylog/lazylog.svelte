@@ -54,17 +54,6 @@
 	// Apply default values
 	const wrapLines = restProps.wrapLines ?? DEFAULT_PROPS.wrapLines;
 
-	let containerWidth = 0;
-	let characterWidth = 8.4; // Approximate width of a character in Monaco font
-	let containerElement: HTMLElement | null = null;
-	let resizeObserver: ResizeObserver | null = null;
-
-	// Calculate max characters that can fit in the container
-	function getMaxLineLength(): number {
-		if (containerWidth === 0) return 100; // Default fallback
-		return Math.floor(containerWidth / characterWidth);
-	}
-
 	function handleSearch(detail: { value: string; caseInsensitive: boolean }) {
 		if (!detail) {
 			return;
@@ -117,7 +106,7 @@
 	}
 
 	function isLineHighlighted(lineNumber: number): boolean {
-		// Only check if line is explicitly highlighted by props, not by search
+		// Only check if a line is explicitly highlighted by props, not by search
 		return isHighlighted(lineNumber, highlight ?? []);
 	}
 
@@ -131,13 +120,8 @@
 	}
 
 	onMount(async () => {
-		// Initialize container width
-		if (containerElement) {
-			containerWidth = containerElement.clientWidth;
-		}
-
 		if (text) {
-			lines = processText(text, wrapLines, getMaxLineLength());
+			lines = processText(text);
 		} else if (url) {
 			if (restProps.websocket || restProps.eventsource) {
 				setupConnection();
@@ -145,27 +129,10 @@
 				await fetchLog();
 			}
 		}
-
-		// Set up a resize observer to recalculate line wrapping when the container size changes
-		if (containerElement) {
-			resizeObserver = new ResizeObserver((entries) => {
-				for (const entry of entries) {
-					containerWidth = entry.contentRect.width;
-					if (wrapLines && lines.length > 0) {
-						// Re-process text when container width changes
-						if (text) {
-							lines = processText(text, wrapLines, getMaxLineLength());
-						}
-					}
-				}
-			});
-
-			resizeObserver.observe(containerElement);
-		}
 	});
 
 	onDestroy(() => {
-		// Clean up connections when component is destroyed
+		// Clean up connections when a component is destroyed
 		if (wsClient) {
 			wsClient.disconnect();
 			wsClient = null;
@@ -174,12 +141,6 @@
 		if (esClient) {
 			esClient.disconnect();
 			esClient = null;
-		}
-
-		// Clean up resize observer
-		if (resizeObserver) {
-			resizeObserver.disconnect();
-			resizeObserver = null;
 		}
 	});
 
@@ -210,7 +171,7 @@
 		const nextLineNumber = lines.length > 0 ? lines[lines.length - 1].number + 1 : 1;
 
 		// Process the incoming message text
-		const newLines = processText(messageText, wrapLines, getMaxLineLength(), nextLineNumber);
+		const newLines = processText(messageText, nextLineNumber);
 
 		// Append to existing lines
 		lines = [...lines, ...newLines];
@@ -255,7 +216,7 @@
 
 			const chunk = decoder.decode(value, { stream: true });
 			const nextLineNumber = lines.length > 0 ? lines[lines.length - 1].number + 1 : 1;
-			const newLines = processText(chunk, wrapLines, getMaxLineLength(), nextLineNumber);
+			const newLines = processText(chunk, nextLineNumber);
 			lines = [...lines, ...newLines];
 		}
 	}
@@ -267,7 +228,7 @@
 				await handleStreaming(response);
 			} else {
 				const text = await response.text();
-				lines = processText(text, wrapLines, getMaxLineLength());
+				lines = processText(text);
 			}
 		} catch (error) {
 			console.error('Error fetching log:', error);
@@ -280,7 +241,6 @@
 	style="height: {height}; width: {width}; {Object.entries(style ?? {})
 		.map(([k, v]) => `${k}: ${v}`)
 		.join(';')}"
-	bind:this={containerElement}
 >
 	<SearchBar
 		{searchText}
