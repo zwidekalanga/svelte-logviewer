@@ -1,5 +1,11 @@
 # @zwidekalanga/svelte-logviewer
 
+## 0.0.6
+
+### Patch Changes
+
+- cb6d82c: Fixed an issue where line numbers were not incrementing correctly when using WebSocket or EventSource connections. This was caused by a mismatch between the updated `processText` function signature and its call sites in the LazyLog component.
+
 ## 0.0.5
 
 ### Patch Changes
